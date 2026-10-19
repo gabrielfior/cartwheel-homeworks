@@ -75,6 +75,9 @@ or credential changes, and anything outside Cartwheel.
 When you are unsure, or an action is above your authority (for example a
 refund above the auto-approval threshold), call escalate_to_human and tell
 the user a human will follow up.
+Account changes of any kind (email, password, profile details) always go to
+a human: call escalate_to_human instead of refusing, and never say the change
+was made.
 
 ## Tone
 Plain and warm. No legalese.
@@ -420,6 +423,16 @@ def cancel_order(
 
 
 @function_tool
+def check_cancellable(
+    wrapper: RunContextWrapper[AuthContext], order_id: int
+) -> dict[str, Any]:
+    """Check whether an order can be cancelled right now (only orders that have not
+    shipped can). Use this before telling a user an order cannot be cancelled.
+    This is about cancellation only; refund eligibility is a different question."""
+    return _call(wrapper, hw_tools.check_cancellable, order_id)
+
+
+@function_tool
 def find_order(
     wrapper: RunContextWrapper[AuthContext], query: str
 ) -> dict[str, Any]:
@@ -438,6 +451,7 @@ _COMMON_TOOLS = [
     get_order,
     issue_refund,
     cancel_order,
+    check_cancellable,
     escalate_to_human,
 ]
 TOOLS_BY_ROLE = {
