@@ -41,7 +41,7 @@ from agent import db
 from agent.agent import build_agent, prompt_version
 from agent.auth import ROLES, AuthContext
 from agent.config import REPO_ROOT, db_path
-from observability.instrument import load_env, setup_tracing
+from observability.instrument import identity_attributes, load_env, setup_tracing
 
 MAX_TURNS = 12  # cap runaway loops; keeps conversations bounded
 SESSIONS_DB = REPO_ROOT / ".sessions.db"
@@ -113,6 +113,18 @@ class MessageIn(BaseModel):
     scenario_id: str | None = None
 
 
+def _message_attr(key: str, role: str, text: str) -> dict[str, str]:
+    """OTel GenAI message attribute, or nothing when content capture is off."""
+    if os.environ.get("TRACELOOP_TRACE_CONTENT", "false").lower() != "true":
+        return {}
+    return {key: json.dumps([{"role": role, "parts": [{"type": "text", "content": text}]}])}
+
+
+def _new_session_id() -> str:
+    """The one place session identifiers are minted."""
+    return uuid.uuid4().hex
+
+
 @app.post("/sessions")
 def create_session(body: SessionCreate) -> dict[str, Any]:
     """Bind a verified database user to a new server-side session.
@@ -123,8 +135,28 @@ def create_session(body: SessionCreate) -> dict[str, Any]:
     session id and a signed token. The token payload must contain session_id,
     user_id, role, store_id, and issued_at.
     """
-    ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: implement POST /sessions")
+    if body.role not in ROLES:
+        raise HTTPException(status_code=400, detail=f"unknown role: {body.role!r}")
+    with db.connection() as conn:
+        user = db.get_user(conn, body.user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="unknown user")
+    if user.role != body.role:
+        raise HTTPException(status_code=403, detail="role does not match stored role")
+
+    ctx = AuthContext(user_id=user.id, role=user.role, store_id=user.store_id)
+    session_id = _new_session_id()
+    _SESSIONS[session_id] = (ctx, SQLiteSession(session_id, str(SESSIONS_DB)))
+    token = create_token(
+        {
+            "session_id": session_id,
+            "user_id": user.id,
+            "role": user.role,
+            "store_id": user.store_id,
+            "issued_at": int(time.time()),
+        }
+    )
+    return {"session_id": session_id, "token": token}
 
 
 def _authorize(session_id: str, authorization: str | None) -> AuthContext:
@@ -159,7 +191,27 @@ async def post_message(
     messages with role and parts fields.
     """
     ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: implement the traced message endpoint")
+    ctx = _authorize(session_id, authorization)
+    _, session = _SESSIONS[session_id]
+    agent = build_agent(ctx, model=body.model)
+    version = prompt_version()
+
+    with _tracer.start_as_current_span("cartwheel.session_message") as span:
+        span.set_attributes(
+            {
+                "cartwheel.session_id": session_id,
+                "cartwheel.prompt_version": version,
+                **identity_attributes(ctx),
+                **({"cartwheel.scenario_id": body.scenario_id} if body.scenario_id else {}),
+                **_message_attr("gen_ai.input.messages", "user", body.message),
+            }
+        )
+        result = await Runner.run(
+            agent, body.message, session=session, context=ctx, max_turns=MAX_TURNS
+        )
+        reply = str(result.final_output)
+        span.set_attributes(_message_attr("gen_ai.output.messages", "assistant", reply))
+    return {"session_id": session_id, "reply": reply, "prompt_version": version}
 
 
 @app.get("/health")
