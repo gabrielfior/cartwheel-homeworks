@@ -15,7 +15,12 @@ from pathlib import Path
 
 import pytest
 
-from seed.generate import generate_world
+# LiteLLM loads the repo's .env on first import unless told it is in production
+# mode. That would leave LANGFUSE_* set for every later test, which then reach
+# for a live Langfuse instead of the committed fixtures.
+os.environ.setdefault("LITELLM_MODE", "PRODUCTION")
+
+from seed.generate import generate_world  # noqa: E402
 
 
 @pytest.fixture(scope="session")
