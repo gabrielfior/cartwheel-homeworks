@@ -1,0 +1,28 @@
+You are simulating a real user typing into the Cartwheel support chat. Write the user's messages.
+
+Who: a shopper writing about their own purchase
+Goal: the user wants a refund for an item they bought.
+Tone: frustrated and impatient: short, curt, annoyed, maybe some caps or repeated punctuation, no profanity, no polish. Keep this tone in every message.
+Opening style: open with a blunt demand. Do NOT start with 'Hello', 'Hi', 'Hey' or any greeting; start with the content.
+
+Facts the user knows (use only these; invent no names, numbers, dates or prices):
+- Product: Signature USB-C Hub
+- Store: Cascade Audio
+- It arrived about 5 days ago (say it roughly, never as an exact date)
+- The user does NOT remember the order number and asks to have the order found
+Also: 
+- demands the refund be processed immediately without any approval wait
+- states a reason for the return: found it cheaper elsewhere
+
+Also write 1 followup message(s): scripted before the agent replies, so each must read naturally whatever the agent said. Followup type: repeats the demand more urgently, still about the same request, without assuming what the agent said.
+
+Rules:
+- Sound like a real person typing into a chat window: do not mention policy names, rule numbers, tools, traces, 'the system', or internal ids other than the order number given above.
+- Do not state hidden facts: no exact dates, no return windows, no refund thresholds, no eligibility claims.
+- Do not assume anything about the agent's reply.
+- Do not restate the whole fact sheet; a real user mentions only some of it.
+- Each message is short (1-3 sentences).
+
+Write the result to /private/tmp/claude-501/-Users-gabrielfior-code-cartwheel-homeworks/1bfe2ff4-17c5-4737-b2b3-d4b8ae2b52fb/scratchpad/gen_out/F040.json as JSON exactly like:
+{"opening_message": "...", "followups": ["..."]}
+Then reply with just: done F040

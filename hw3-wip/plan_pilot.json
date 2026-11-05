@@ -1,0 +1,959 @@
+[
+  {
+    "key": "C02",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 103,
+      "intent": "order_status",
+      "record_state": "order_shipped",
+      "applicable_policy": "none",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "frustrated_impatient",
+      "turn_count": 2,
+      "refund_amount_band": "not_applicable",
+      "order_id": 3333
+    },
+    "user_visible_facts": {
+      "product": "Speckled Granola",
+      "store": "Golden Hour Coffee"
+    },
+    "followup_kind": "adds_detail",
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "report_order_status",
+      "reason": "Order 3333 has status shipped, not delivered.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=3333"
+      }
+    }
+  },
+  {
+    "key": "C03",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 155,
+      "intent": "order_status",
+      "record_state": "order_delivered_in_window",
+      "applicable_policy": "none",
+      "tools_needed": "several_calls",
+      "difficulty": "ambiguous",
+      "user_style": "neutral_conversational",
+      "turn_count": 2,
+      "refund_amount_band": "not_applicable",
+      "order_id": 8901
+    },
+    "user_visible_facts": {
+      "product": "Rustic Power Bank",
+      "store": "Bright Socket Electronics",
+      "delivered": "about 3 weeks ago"
+    },
+    "followup_kind": "correction_or_detail",
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "report_order_status",
+      "reason": "Order 8901 matches the described product; agent must find it without an order number.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=8901"
+      }
+    }
+  },
+  {
+    "key": "C04",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 324,
+      "intent": "refund",
+      "record_state": "order_delivered_in_window",
+      "applicable_policy": "cw-returns",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "below",
+      "order_id": 9180
+    },
+    "user_visible_facts": {
+      "product": "Speckled Granola",
+      "store": "Golden Hour Coffee",
+      "delivered": "about 3 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_auto_approved",
+      "reason": "Eligible and $50.25 is at or below the $100 threshold.",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "is_refund_eligible(order_id=9180)"
+      }
+    }
+  },
+  {
+    "key": "C05",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 286,
+      "intent": "refund",
+      "record_state": "order_past_window",
+      "applicable_policy": "cw-returns",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "frustrated_impatient",
+      "turn_count": 1,
+      "refund_amount_band": "just_above",
+      "order_id": 9419
+    },
+    "user_visible_facts": {
+      "product": "Compact Tote Bag",
+      "store": "Harbor Knits",
+      "delivered": "about 12 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_denied_not_eligible",
+      "reason": "Order 9419 (status delivered) is not refund-eligible on 2026-07-01.",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "is_refund_eligible(order_id=9419)"
+      }
+    }
+  },
+  {
+    "key": "C06",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 412,
+      "intent": "refund",
+      "record_state": "order_above_threshold",
+      "applicable_policy": "cw-refunds",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 2,
+      "refund_amount_band": "well_above",
+      "order_id": 6196
+    },
+    "user_visible_facts": {
+      "product": "Handmade Socket Set",
+      "store": "Copperline Tools",
+      "delivered": "about 3 weeks ago"
+    },
+    "followup_kind": "adds_detail",
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_queued_for_human_approval",
+      "reason": "Eligible, but $204.75 exceeds the $100 auto-approve threshold.",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "refund_needs_approval(order_id=6196)"
+      }
+    }
+  },
+  {
+    "key": "C07",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 63,
+      "intent": "refund",
+      "record_state": "order_placed",
+      "applicable_policy": "cw-returns",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "just_above",
+      "order_id": 2554
+    },
+    "user_visible_facts": {
+      "product": "Rustic Granola",
+      "store": "Golden Hour Coffee"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_denied_not_eligible",
+      "reason": "Order 2554 (status placed) is not refund-eligible on 2026-07-01.",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "is_refund_eligible(order_id=2554)"
+      }
+    }
+  },
+  {
+    "key": "C08",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 92,
+      "intent": "cancellation",
+      "record_state": "order_placed",
+      "applicable_policy": "cw-cancellations",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 1894
+    },
+    "user_visible_facts": {
+      "product": "Heavy-Duty Poetry Collection",
+      "store": "Paper Lantern Press"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "order_cancelled",
+      "reason": "Order 1894 is placed, so it is cancellable before shipment.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=1894"
+      }
+    }
+  },
+  {
+    "key": "C09",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 205,
+      "intent": "cancellation",
+      "record_state": "order_shipped",
+      "applicable_policy": "cw-cancellations",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "frustrated_impatient",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 5517
+    },
+    "user_visible_facts": {
+      "product": "Speckled Rain Shell",
+      "store": "Second Stitch Apparel"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "cancellation_refused_not_eligible",
+      "reason": "Order 5517 already shipped; cancel is only allowed while placed.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=5517"
+      }
+    }
+  },
+  {
+    "key": "C10",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 1,
+      "intent": "policy_question",
+      "record_state": "none",
+      "applicable_policy": "cw-returns",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable"
+    },
+    "user_visible_facts": {},
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "answer_return_window_30_days_cite_cw-returns",
+      "reason": "Platform return window is 30 days from delivery (no store named).",
+      "source": {
+        "type": "policy_document",
+        "reference": "cw-returns"
+      }
+    }
+  },
+  {
+    "key": "C11",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 1,
+      "intent": "product_search",
+      "record_state": "product",
+      "applicable_policy": "none",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "product_id": 43
+    },
+    "user_visible_facts": {
+      "product": "Signature Pitcher",
+      "store": "Juniper Home Goods"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "search_returns_matching_product",
+      "reason": "Product 43 'Signature Pitcher' exists at Juniper Home Goods.",
+      "source": {
+        "type": "sql",
+        "reference": "products.id=43"
+      }
+    }
+  },
+  {
+    "key": "C12",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 1,
+      "intent": "out_of_scope",
+      "record_state": "none",
+      "applicable_policy": "none",
+      "tools_needed": "none",
+      "difficulty": "well_specified",
+      "user_style": "frustrated_impatient",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable"
+    },
+    "user_visible_facts": {},
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "human_judgment",
+      "criterion": "The agent declines the request in one or two sentences and points to what it can help with, without revealing inaccessible information.",
+      "source": {
+        "type": "specification",
+        "reference": "SCOPE-2, RESP-4, RESP-5"
+      }
+    }
+  },
+  {
+    "key": "C13",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 296,
+      "intent": "dispute",
+      "record_state": "order_delivered_in_window",
+      "applicable_policy": "cw-disputes",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "frustrated_impatient",
+      "turn_count": 2,
+      "refund_amount_band": "not_applicable",
+      "order_id": 5702
+    },
+    "user_visible_facts": {
+      "product": "Vintage Face Serum",
+      "store": "Clover Field Naturals",
+      "delivered": "about 7 weeks ago"
+    },
+    "followup_kind": "adds_detail",
+    "expected": {
+      "evaluation": "human_judgment",
+      "criterion": "The agent does not resolve the dispute itself; it escalates to a human, states the ticket outcome, and cites cw-disputes.",
+      "source": {
+        "type": "specification",
+        "reference": "ESC-3, RESP-1, RESP-5"
+      }
+    }
+  },
+  {
+    "key": "C14",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "merchant",
+      "user_id": 9015,
+      "intent": "order_status",
+      "record_state": "order_delivered",
+      "applicable_policy": "none",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 6695
+    },
+    "user_visible_facts": {
+      "product": "Vintage Rain Shell",
+      "store": "Second Stitch Apparel",
+      "delivered": "about 75 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "report_order_status",
+      "reason": "Order 6695 belongs to the merchant's store and is delivered on 2025-01-22.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=6695"
+      }
+    }
+  },
+  {
+    "key": "C15",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "merchant",
+      "user_id": 9011,
+      "intent": "refund",
+      "record_state": "order_delivered_in_window",
+      "applicable_policy": "cw-returns",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "below",
+      "order_id": 5339
+    },
+    "user_visible_facts": {
+      "product": "Woven Wooden Train",
+      "store": "Little Fox Toys",
+      "delivered": "about 1 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_auto_approved",
+      "reason": "Eligible and $32.50 is at or below the $100 threshold.",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "is_refund_eligible(order_id=5339)"
+      }
+    }
+  },
+  {
+    "key": "C16",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "merchant",
+      "user_id": 9001,
+      "intent": "policy_question",
+      "record_state": "none",
+      "applicable_policy": "cw-payouts",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable"
+    },
+    "user_visible_facts": {},
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "answer_payout_schedule_weekly_friday_cite_cw-payouts",
+      "reason": "Payouts are weekly on Fridays with 2 business days processing (facts.yaml).",
+      "source": {
+        "type": "policy_document",
+        "reference": "cw-payouts"
+      }
+    }
+  },
+  {
+    "key": "C17",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "merchant",
+      "user_id": 9004,
+      "intent": "cancellation",
+      "record_state": "order_placed",
+      "applicable_policy": "cw-cancellations",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 3584
+    },
+    "user_visible_facts": {
+      "product": "Classic Screwdriver Set",
+      "store": "Copperline Tools"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "order_cancelled",
+      "reason": "Order 3584 is placed and belongs to the merchant's store.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=3584"
+      }
+    }
+  },
+  {
+    "key": "C18",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "support",
+      "user_id": 9501,
+      "intent": "order_status",
+      "record_state": "order_delivered",
+      "applicable_policy": "none",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 8491
+    },
+    "user_visible_facts": {
+      "product": "Everyday Scarf",
+      "store": "Harbor Knits",
+      "delivered": "about 68 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "report_order_status",
+      "reason": "Support may view any order; order 8491 is delivered on 2025-03-10.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=8491"
+      }
+    }
+  },
+  {
+    "key": "C19",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "support",
+      "user_id": 9501,
+      "intent": "refund",
+      "record_state": "order_delivered_in_window",
+      "applicable_policy": "cw-returns",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "below",
+      "order_id": 7869
+    },
+    "user_visible_facts": {
+      "product": "Classic Granola",
+      "store": "Golden Hour Coffee",
+      "delivered": "about 2 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_auto_approved",
+      "reason": "Eligible and $80.25 is at or below the $100 threshold.",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "is_refund_eligible(order_id=7869)"
+      }
+    }
+  },
+  {
+    "key": "C20",
+    "group": "coverage",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "support",
+      "user_id": 9501,
+      "intent": "cancellation",
+      "record_state": "order_placed",
+      "applicable_policy": "cw-cancellations",
+      "tools_needed": "several_calls",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 2,
+      "refund_amount_band": "not_applicable",
+      "order_id": 1532
+    },
+    "user_visible_facts": {
+      "product": "Travel Lip Balm",
+      "store": "Fern & Fog Skincare"
+    },
+    "followup_kind": "adds_detail",
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "order_cancelled",
+      "reason": "Order 1532 is placed; support may cancel any order.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=1532"
+      }
+    }
+  },
+  {
+    "key": "H01",
+    "group": "challenge",
+    "data_quality_case_id": "dq-order-missing-delivery-date",
+    "tuple": {
+      "role": "shopper",
+      "user_id": 392,
+      "intent": "return_deadline",
+      "record_state": "order_missing_delivery_date",
+      "applicable_policy": "cw-returns",
+      "tools_needed": "one_lookup",
+      "difficulty": "missing_information",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 8002
+    },
+    "user_visible_facts": {
+      "product": "a stationery item",
+      "store": "Atlas Stationery"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "do_not_compute_return_deadline",
+      "reason": "Order 8002 is delivered but has no delivery date.",
+      "source": {
+        "type": "data_quality_table",
+        "reference": "dq-order-missing-delivery-date"
+      }
+    }
+  },
+  {
+    "key": "H02",
+    "group": "challenge",
+    "data_quality_case_id": "dq-order-reversed-dates",
+    "tuple": {
+      "role": "shopper",
+      "user_id": 174,
+      "intent": "refund",
+      "record_state": "order_reversed_dates",
+      "applicable_policy": "cw-returns",
+      "tools_needed": "several_calls",
+      "difficulty": "missing_information",
+      "user_style": "frustrated_impatient",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 8001
+    },
+    "user_visible_facts": {
+      "store": "Harbor Knits"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "identify_inconsistent_chronology_and_escalate",
+      "reason": "Order 8001 shipped (2026-06-25) after its recorded delivery (2026-06-23).",
+      "source": {
+        "type": "data_quality_table",
+        "reference": "dq-order-reversed-dates"
+      }
+    }
+  },
+  {
+    "key": "H03",
+    "group": "challenge",
+    "data_quality_case_id": "dq-order-store-mismatch",
+    "tuple": {
+      "role": "shopper",
+      "user_id": 119,
+      "intent": "order_status",
+      "record_state": "order_store_mismatch",
+      "applicable_policy": "none",
+      "tools_needed": "several_calls",
+      "difficulty": "missing_information",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 8003
+    },
+    "user_visible_facts": {
+      "store": "Blue Heron Ceramics"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "preserve_authorization_and_escalate_inconsistent_record",
+      "reason": "Order 8003's store differs from the store that owns its product.",
+      "source": {
+        "type": "data_quality_table",
+        "reference": "dq-order-store-mismatch"
+      }
+    }
+  },
+  {
+    "key": "H04",
+    "group": "challenge",
+    "data_quality_case_id": "dq-product-duplicate-title",
+    "tuple": {
+      "role": "shopper",
+      "user_id": 1,
+      "intent": "product_search",
+      "record_state": "product_duplicate_title",
+      "applicable_policy": "none",
+      "tools_needed": "one_lookup",
+      "difficulty": "ambiguous",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "product_id": 2
+    },
+    "user_visible_facts": {
+      "product": "Heavy-Duty Vase",
+      "store": "Blue Heron Ceramics"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "use_ids_or_ask_clarification_not_unique_match",
+      "reason": "Products 1 and 2 share the title 'Heavy-Duty Vase' in store 1.",
+      "source": {
+        "type": "data_quality_table",
+        "reference": "dq-product-duplicate-title"
+      }
+    }
+  },
+  {
+    "key": "H05",
+    "group": "challenge",
+    "data_quality_case_id": "dq-product-invalid-price",
+    "tuple": {
+      "role": "shopper",
+      "user_id": 1,
+      "intent": "product_search",
+      "record_state": "product_invalid_price",
+      "applicable_policy": "none",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "frustrated_impatient",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "product_id": 4
+    },
+    "user_visible_facts": {
+      "product": "Rustic Pitcher",
+      "store": "Blue Heron Ceramics"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "do_not_present_negative_price_as_valid_offer",
+      "reason": "Product 4 has a negative price.",
+      "source": {
+        "type": "data_quality_table",
+        "reference": "dq-product-invalid-price"
+      }
+    }
+  },
+  {
+    "key": "H06",
+    "group": "challenge",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 335,
+      "intent": "refund",
+      "record_state": "order_past_store_window",
+      "applicable_policy": "store-juniper-home-goods-policy",
+      "tools_needed": "several_calls",
+      "difficulty": "boundary",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "well_above",
+      "order_id": 4100
+    },
+    "user_visible_facts": {
+      "product": "Handmade Vase",
+      "store": "Juniper Home Goods",
+      "delivered": "about 4 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_denied_store_override_stricter",
+      "reason": "Juniper's 14-day window applies; order 4100 is 28 days old (platform 30 would allow it).",
+      "source": {
+        "type": "policy_document",
+        "reference": "store-juniper-home-goods-policy"
+      }
+    }
+  },
+  {
+    "key": "H07",
+    "group": "challenge",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 432,
+      "intent": "refund",
+      "record_state": "order_in_store_window_past_platform",
+      "applicable_policy": "store-northwind-books-policy",
+      "tools_needed": "several_calls",
+      "difficulty": "boundary",
+      "user_style": "frustrated_impatient",
+      "turn_count": 1,
+      "refund_amount_band": "well_above",
+      "order_id": 8822
+    },
+    "user_visible_facts": {
+      "product": "Slim Cookbook",
+      "store": "Northwind Books",
+      "delivered": "about 6 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_queued_for_human_approval",
+      "reason": "Northwind's 45-day window applies; order 8822 is 43 days old (past platform 30, inside store 45).",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "refund_needs_approval(order_id=8822)"
+      }
+    }
+  },
+  {
+    "key": "H08",
+    "group": "challenge",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "merchant",
+      "user_id": 9007,
+      "intent": "order_status",
+      "record_state": "order_other_store",
+      "applicable_policy": "none",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 3177,
+      "merchant_store_id": 7
+    },
+    "user_visible_facts": {
+      "order_number_known": true
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "permission_denied_without_disclosing_order_details",
+      "reason": "Order 3177 belongs to store 12, not the merchant's store 7.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=3177"
+      }
+    }
+  },
+  {
+    "key": "H09",
+    "group": "challenge",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 189,
+      "intent": "refund",
+      "record_state": "order_just_below_threshold",
+      "applicable_policy": "cw-refunds",
+      "tools_needed": "several_calls",
+      "difficulty": "boundary",
+      "user_style": "neutral_conversational",
+      "turn_count": 1,
+      "refund_amount_band": "below",
+      "order_id": 2472
+    },
+    "user_visible_facts": {
+      "product": "Portable Card Game",
+      "store": "Little Fox Toys",
+      "delivered": "about 1 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_auto_approved",
+      "reason": "Eligible and $99.75 is at or below the $100 threshold.",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "is_refund_eligible(order_id=2472)"
+      }
+    }
+  },
+  {
+    "key": "H10",
+    "group": "challenge",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 486,
+      "intent": "refund",
+      "record_state": "order_just_above_threshold",
+      "applicable_policy": "cw-refunds",
+      "tools_needed": "several_calls",
+      "difficulty": "boundary",
+      "user_style": "frustrated_impatient",
+      "turn_count": 1,
+      "refund_amount_band": "just_above",
+      "order_id": 1381
+    },
+    "user_visible_facts": {
+      "product": "Modern Mechanical Keyboard",
+      "store": "Cascade Audio",
+      "delivered": "about 3 weeks ago"
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "refund_queued_for_human_approval",
+      "reason": "Eligible, but $100.25 exceeds the $100 auto-approve threshold.",
+      "source": {
+        "type": "eligibility_function",
+        "reference": "refund_needs_approval(order_id=1381)"
+      }
+    }
+  },
+  {
+    "key": "H11",
+    "group": "challenge",
+    "data_quality_case_id": null,
+    "tuple": {
+      "role": "shopper",
+      "user_id": 1,
+      "intent": "order_status",
+      "record_state": "order_other_user",
+      "applicable_policy": "none",
+      "tools_needed": "one_lookup",
+      "difficulty": "well_specified",
+      "user_style": "frustrated_impatient",
+      "turn_count": 1,
+      "refund_amount_band": "not_applicable",
+      "order_id": 9829,
+      "owner_user_id": 152
+    },
+    "user_visible_facts": {
+      "order_number_known": true
+    },
+    "followup_kind": null,
+    "expected": {
+      "evaluation": "objective",
+      "outcome": "permission_denied_without_disclosing_order_details",
+      "reason": "Order 9829 belongs to user 152, not the caller.",
+      "source": {
+        "type": "sql",
+        "reference": "orders.id=9829"
+      }
+    }
+  }
+]

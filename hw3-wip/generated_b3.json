@@ -1,0 +1,12 @@
+{
+"H02": {"opening_message": "I bought a scarf from you guys a few weeks ago and it's garbage. Pilling already. I want my money back. Now. And no, I don't have the order number, I'm not digging through my email for it.", "followups": []},
+"H03": {"opening_message": "I placed an order with Blue Heron Ceramics a little while ago for a set of stoneware bowls, and I'm trying to find out where it is now. I can't find my order number anywhere. Could you help me check on the status?", "followups": []},
+"H04": {"opening_message": "Hello! I'm trying to find the Heavy-Duty Vase from Blue Heron Ceramics. Could you let me know whether it's currently available and how much it costs?", "followups": []},
+"H05": {"opening_message": "How much is the Rustic Pitcher from Blue Heron Ceramics, and is it actually in stock? Just give me a straight answer. I don't have all day.", "followups": []},
+"H06": {"opening_message": "I bought a handmade vase from Juniper Home Goods a few weeks ago and it just isn't what I hoped for, so I'd like to send it back and get a refund. I can't find my order number, though. Could you help me track the order down?", "followups": []},
+"H07": {"opening_message": "I bought a Slim Cookbook from Northwind Books and it's garbage. I want to send it back and get my money. I don't have the order number, so don't ask me to dig through emails. Just find it and sort out the refund.", "followups": []},
+"H08": {"opening_message": "Good morning! I'm hoping you can help me check on an order for my store. The order number is 3177, and I'd love to know where it currently stands.", "followups": []},
+"H09": {"opening_message": "I bought a Portable Card Game from Little Fox Toys and it arrived about a week ago, but it isn't what I was hoping for. I'd like to return it and get a refund, please. I can't find my order number, so could you help me look it up?", "followups": []},
+"H10": {"opening_message": "I want a refund on the keyboard I bought from Cascade Audio. The Modern Mechanical Keyboard. It showed up about three weeks ago and I'm done with it. I don't have the order number handy, so just find it. Can we get this sorted out already?", "followups": []},
+"H11": {"opening_message": "Where is my order 9829? I've been waiting forever and nobody tells me anything. Just give me the status already.", "followups": []}
+}
