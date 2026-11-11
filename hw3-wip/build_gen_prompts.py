@@ -45,7 +45,7 @@ FOLLOW = {
 }
 
 import sqlite3
-_c = sqlite3.connect("file:/Users/gabrielfior/code/cartwheel-homeworks/data/cartwheel.db?mode=ro", uri=True)
+_c = sqlite3.connect(f"file:{Path(__file__).resolve().parents[1]}/data/cartwheel.db?mode=ro", uri=True)
 OWN = {r[0]: r[1] for r in _c.execute("SELECT u.id, s.name FROM users u JOIN stores s ON s.id=u.store_id WHERE u.role='merchant'")}
 for p in plans:
     t, v, g = p["tuple"], p["user_visible_facts"], p["gen"]

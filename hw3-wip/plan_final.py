@@ -11,7 +11,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-REPO = Path("/Users/gabrielfior/code/cartwheel-homeworks")
+REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from seed.eligibility import effective_return_window_days, is_refund_eligible  # noqa: E402
 

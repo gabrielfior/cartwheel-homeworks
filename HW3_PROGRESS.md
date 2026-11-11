@@ -2,7 +2,7 @@
 
 ## HANDOFF (read first if you are a new Claude session)
 Branch `hw3-wip`. Student is driving: one step at a time, wait for their "go" before running a command, changing a file or generating anything (reading to prepare is fine). Follow AGENTS.md, homework/module-1/hw3.md and scenarios/skill/SKILL.md. Leave assessments, video and review decisions to the student.
-State: pilot done (pilot_review.jsonl written, 7 valid confirmed failures). Part C generation + critic pass DONE for all 250: work files are in `hw3-wip/` (copied from a session scratchpad):
+State: pilot done (pilot_review.jsonl written, 7 valid confirmed failures). Part C generation + critic pass DONE for all 250: generation scaffolding lives in `hw3-wip/` (scripts + README; generated intermediates were removed from git, see hw3-wip/README.md):
 - `plan_final.json` (F001..F250 plans incl. `expected`; built by `plan_final.py`), `build_gen_prompts.py` -> `gen_prompts/`, haiku generator outputs `gen_out/Fxxx.json`, sonnet critic prompts `critic_prompts/` -> final messages `critic_out/Fxxx.json` ({opening_message, followups, changed, note}).
 - Screen of critic_out: all 250 parse, follow-up counts match turn_count, 0 duplicates, 8 greeting openings, F238 "refund threshold" is an acceptable policy question.
 UPDATE 2026-11-11: support_scenarios.jsonl (250, validated --final), support_review.jsonl (15: 13 accept, 2 revise = support-0011 expected.reason, support-0051 expected.reason), monitoring_scenarios.jsonl (50, validated) DONE and committed. REMAINING: Part D reseed + final run + `jq` check 250 completed; Part E smoke report + trace export; student: video, assessments. (Older NEXT list below is partly done.)
@@ -37,7 +37,7 @@ Next: STUDENT writes scenarios/pilot_review.jsonl (>= 10 reviewed; fields scenar
 - Student: AI engineer + software engineer. Skip programming basics; explain eval concepts briefly, infra as a checklist.
 - CARTWHEEL_MODEL=openai/google/gemma-4-26B-A4B-it, confirmed by student. Same string in every `--model` flag.
 - HW2 completed by student (do NOT apply hw2-reference.patch).
-- .env Langfuse vars had pointed at Langfuse Cloud (us.cloud.langfuse.com, cloud keys); student switched back to local (http://localhost:3000, pk/sk-lf-cartwheel-dev). Local login: student@example.com (password in a comment in observability/docker-compose.yml); demo@langfuse.com has no org, so it shows no orgs. Never print key values.
+- .env Langfuse vars point at the local stack (http://localhost:3000); keys are never printed or committed. Check the local Langfuse login in observability/docker-compose.yml.
 - Local Langfuse had 9 traces from HW2 before the smoke trace.
 
 ## Damaged records (data_quality_cases)
