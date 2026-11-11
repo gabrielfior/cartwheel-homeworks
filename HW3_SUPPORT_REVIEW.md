@@ -132,7 +132,7 @@ Decide per scenario: **accept / revise / reject** (add a reason; for revise, say
 **Expected:** `answer_cancel_only_before_shipment_cite_cw-cancellations` (objective) — Orders can be cancelled only before shipment.
 **Source:** policy_document / cw-cancellations
 
-**Your decision:** TODO (accept / revise / reject) — reason:
+**Your decision:** revise — reason: LLM should also explain more about cancellation process, not only deadline.
 
 ## 11. support-0051 — coverage product_search (merchant)
 
@@ -145,7 +145,7 @@ Decide per scenario: **accept / revise / reject** (add a reason; for revise, say
 **Expected:** `search_returns_matching_product` (objective) — Product 639 'Heavy-Duty Tote Bag' exists at Harbor Knits for $137.75.
 **Source:** sql / products.id=639
 
-**Your decision:** TODO (accept / revise / reject) — reason:
+**Your decision:** revise — reason: I don't want internal product ID to be exposed in the conversation.
 
 ## 12. support-0073 — coverage dispute (support)
 
