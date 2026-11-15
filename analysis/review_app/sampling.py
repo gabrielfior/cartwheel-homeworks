@@ -125,6 +125,9 @@ def apply(
     by_id = {t["trace_id"]: t for t in pool_all}
     man = read_manifest(state_dir)
     have = {e["trace_id"] for e in man["entries"]}
+    dupes = [t for t, n in Counter(p["trace_id"] for p in picks).items() if n > 1]
+    if dupes:
+        raise SystemExit(f"refusing: {len(dupes)} trace id(s) listed more than once, e.g. {dupes[0]}")
     clash = [p["trace_id"] for p in picks if p["trace_id"] in have]
     if clash:
         raise SystemExit(f"refusing: {len(clash)} trace(s) already in the sample, e.g. {clash[0]}")

@@ -216,7 +216,7 @@ class Store:
             if existing:
                 if existing.get("deleted"):
                     raise ApiError("annotation was deleted", 409)
-                if note != existing.get("note", ""):
+                if existing.get("kind") == "note" and note != existing.get("note", ""):
                     existing.setdefault("history", []).append(
                         {"ts": existing.get("updated_ts") or existing["ts"], "note": existing.get("note", "")}
                     )

@@ -176,6 +176,13 @@ class StoreTest(unittest.TestCase):
         rec = json.loads((self.dir / "labels" / "new_name.jsonl").read_text().splitlines()[0])
         self.assertEqual(rec["mode"], "new_name")
 
+    def test_resaving_a_no_failure_mark_keeps_its_text(self):
+        self.sample(["t-a1"])
+        nf = self.store.annotation_upsert({"trace_id": "t-a1", "kind": "no_failure"})
+        again = self.store.annotation_upsert({"id": nf["id"], "trace_id": "t-a1", "kind": "no_failure"})
+        self.assertEqual(again["note"], "no failure observed")
+        self.assertNotIn("history", again)
+
     def test_deleting_annotation_unlinks_it_from_modes(self):
         self.sample(["t-a1"])
         a = self.store.annotation_upsert({"trace_id": "t-a1", "note": "n"})
@@ -285,6 +292,16 @@ class SamplingFrameTest(unittest.TestCase):
             self.assertTrue(all(e["restriction"] == "only sessions with no turn already in the sample" for e in b4))
             self.assertIn("frame", man["frame"])
             self.assertIn("excluded", man["frame"])
+
+
+class SamplingDuplicateTest(unittest.TestCase):
+    def test_apply_refuses_a_trace_listed_twice_in_one_batch(self):
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            picks = [{"trace_id": "t-a1", "reason": "r"}, {"trace_id": "t-a1", "reason": "r"}]
+            with self.assertRaises(SystemExit):
+                sampling.apply(d, TRACES, 3, picks, 7, {}, dry_run=False)
+            self.assertFalse((d / "sample_manifest.json").exists())
 
 
 class HttpSmokeTest(unittest.TestCase):
