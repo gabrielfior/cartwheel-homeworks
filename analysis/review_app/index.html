@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cartwheel review</title>
+<style>
+  :root {
+    --user:#2563eb; --assistant:#059669; --call:#b45309; --result:#7c3aed; --retr:#0891b2;
+    --bg:#f6f7f9; --panel:#fff; --ink:#18181b; --muted:#6b7280; --line:#e4e4e7;
+    --hl:#fde68a; --hl-pend:#fef08a; --sugg:#ddd6fe; --sugg-b:#7c3aed;
+    --bad:#dc2626; --good:#16a34a; --warn:#b45309;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  code,pre,.mono { font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; }
+  button { font:inherit; cursor:pointer; border:1px solid var(--line); background:var(--panel); border-radius:6px; padding:4px 10px; color:var(--ink); }
+  button:hover:not(:disabled) { border-color:var(--ink); }
+  button:disabled { opacity:.45; cursor:default; }
+  input,select,textarea { font:inherit; border:1px solid var(--line); border-radius:6px; padding:5px 8px; background:var(--panel); color:var(--ink); }
+  textarea { width:100%; resize:vertical; }
+
+  header { position:sticky; top:0; z-index:60; display:flex; align-items:center; gap:14px; padding:8px 16px; background:var(--panel); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  header h1 { font-size:15px; margin:0; }
+  header h1 span { color:var(--muted); font-weight:400; }
+  .tabs { display:flex; gap:4px; }
+  .tabs button.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .grow { flex:1; }
+  .pill { font-size:11px; padding:1px 8px; border-radius:10px; background:#f4f4f5; color:var(--muted); white-space:nowrap; }
+  .pill.warn { background:#fef3c7; color:#92400e; }
+  #banner { display:none; background:#fef3c7; color:#92400e; padding:6px 16px; font-size:13px; }
+
+  .view { display:none; } .view.active { display:block; }
+
+  /* review layout */
+  #review { display:grid; grid-template-columns:250px minmax(0,1fr); min-height:calc(100vh - 52px); }
+  #rail { border-right:1px solid var(--line); background:var(--panel); padding:10px; overflow:auto; max-height:calc(100vh - 52px); position:sticky; top:52px; }
+  #rail .filters { display:grid; gap:6px; margin-bottom:10px; }
+  #rail .filters label { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+  .srow { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; cursor:pointer; border:1px solid transparent; }
+  .srow:hover { background:#f4f4f5; } .srow.cur { border-color:var(--ink); background:#fafafa; }
+  .dot { width:10px; height:10px; border-radius:50%; flex:none; border:2px solid var(--muted); }
+  .dot.noted { background:var(--hl); border-color:#ca8a04; } .dot.clear { background:var(--good); border-color:var(--good); }
+  .dot.unreviewed { background:transparent; } .dot.none { opacity:.35; }
+  .srow .t { font-size:12px; line-height:1.3; min-width:0; } .srow .t b { font-weight:600; }
+  .srow .t span { color:var(--muted); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  #main { padding:16px 18px 120px; min-width:0; }
+  .shead { max-width:1120px; margin:0 auto 12px; display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--line); }
+  .shead .sid { font-weight:700; }
+  .wrap { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:22px; max-width:1120px; margin:0 auto; align-items:start; }
+  #conv { min-width:0; position:relative; }
+  #margin { position:relative; }
+  .turn { margin-bottom:26px; }
+  .turn.ctx { opacity:.62; }
+  .thead { display:flex; gap:8px; align-items:center; font-size:12px; color:var(--muted); margin-bottom:6px; flex-wrap:wrap; }
+  .thead b { color:var(--ink); }
+  .step { border:1px solid var(--line); border-radius:8px; background:var(--panel); margin-bottom:8px; overflow:hidden; }
+  .msg { padding:8px 12px; border-left:4px solid var(--line); background:var(--panel); }
+  .step .msg + .msg { border-top:1px solid var(--line); }
+  .turn > .msg { border:1px solid var(--line); border-left-width:4px; border-radius:8px; margin-bottom:8px; }
+  .msg[data-role=user] { border-left-color:var(--user); } .msg[data-role=assistant] { border-left-color:var(--assistant); }
+  .msg[data-role=tool_call] { border-left-color:var(--call); } .msg[data-role=tool_result] { border-left-color:var(--result); }
+  .msg[data-role=retrieval] { border-left-color:var(--retr); }
+  .role { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px; display:flex; gap:8px; align-items:center; }
+  [data-role=user] .role { color:var(--user); } [data-role=assistant] .role { color:var(--assistant); }
+  [data-role=tool_call] .role { color:var(--call); } [data-role=tool_result] .role { color:var(--result); }
+  .text { white-space:pre-wrap; word-wrap:break-word; }
+  .msg[data-role=assistant] .text, .msg[data-role=user] .text { font-size:15px; }
+  pre.j { margin:0; background:#f4f4f5; border-radius:6px; padding:6px 9px; font-size:12.5px; white-space:pre-wrap; word-break:break-word; }
+  .ok { font-size:10px; padding:0 6px; border-radius:8px; font-weight:700; } .ok.t { background:#dcfce7; color:#166534; } .ok.f { background:#fee2e2; color:#991b1b; }
+  .card { border:1px solid var(--line); border-left:3px solid var(--retr); border-radius:6px; padding:6px 9px; margin:5px 0; background:#fcfeff; }
+  .card .ch { font-size:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .card .ch code { background:#e0f2fe; color:#075985; padding:0 6px; border-radius:6px; }
+  .card .sn { white-space:pre-wrap; font-size:13px; margin-top:4px; }
+  details > summary { cursor:pointer; color:var(--muted); font-size:12px; }
+
+  .hl { background:var(--hl); border-radius:2px; cursor:pointer; }
+  .hl.pend { background:var(--hl-pend); } .hl.sugg { background:var(--sugg); border-bottom:2px dashed var(--sugg-b); }
+  .hl.focus { outline:2px solid var(--ink); }
+  .mcard { position:absolute; left:0; width:100%; background:var(--panel); border:1px solid var(--line); border-left:3px solid #ca8a04; border-radius:6px; padding:6px 8px; font-size:12.5px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .mcard.sugg { border-left-color:var(--sugg-b); background:#faf5ff; border-style:dashed; }
+  .mcard.focus { box-shadow:0 0 0 2px var(--ink); }
+  .mcard .q { color:var(--muted); font-style:italic; margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mcard .tag { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--sugg-b); }
+  .mcard .acts { display:flex; gap:6px; margin-top:4px; } .mcard .acts button { font-size:11px; padding:1px 8px; }
+  .acc { color:var(--good); border-color:var(--good); } .rej { color:var(--bad); border-color:var(--bad); }
+
+  .tfoot { border:1px dashed var(--line); border-radius:8px; padding:8px 12px; background:#fcfcfd; display:grid; gap:8px; }
+  .tfoot .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .lab-row { display:grid; grid-template-columns:minmax(120px,170px) auto auto 1fr auto; gap:8px; align-items:center; font-size:13px; }
+  .lab-row .mono { font-size:12px; }
+  button.pres.on { background:var(--bad); color:#fff; border-color:var(--bad); } button.abs.on { background:var(--good); color:#fff; border-color:var(--good); }
+  .sync { font-size:11px; color:var(--muted); } .sync.bad { color:var(--bad); }
+
+  #pop { position:absolute; z-index:200; display:none; background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,.18); padding:8px; }
+  #pop input { width:300px; } #pop .hint { font-size:11px; color:var(--muted); margin-top:3px; }
+  #toast { position:fixed; right:16px; bottom:16px; background:var(--ink); color:#fff; padding:8px 14px; border-radius:8px; font-size:13px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:300; max-width:360px; }
+  #toast.show { opacity:1; } #toast.err { background:var(--bad); }
+
+  .page { max-width:1100px; margin:0 auto; padding:18px; }
+  .page h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:20px 0 8px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:var(--panel); }
+  th,td { text-align:left; padding:5px 9px; border-bottom:1px solid var(--line); font-size:13px; }
+  th { color:var(--muted); font-weight:600; font-size:12px; }
+  .grid2 { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:16px; align-items:start; }
+  .mode h3 { margin:0 0 6px; font:600 14px ui-monospace,Menlo,monospace; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .mode label { display:block; font-size:12px; color:var(--muted); margin:6px 0 2px; }
+  .mode .two { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .mode .two select, .mode .two input { width:100%; }
+  .link { color:var(--user); cursor:pointer; text-decoration:underline; }
+  .need { color:var(--warn); } .met { color:var(--good); }
+  td.cell { text-align:center; } td.cell button { min-width:64px; font-size:12px; }
+  td.cell button.p { background:var(--bad); color:#fff; border-color:var(--bad); } td.cell button.a { background:var(--good); color:#fff; border-color:var(--good); }
+  .bar { height:8px; background:#e4e4e7; border-radius:4px; overflow:hidden; } .bar > i { display:block; height:100%; background:var(--assistant); }
+  .empty { color:var(--muted); padding:8px 0; }
+  @media (max-width:900px){ #review{grid-template-columns:1fr} #rail{position:static;max-height:240px} .wrap{grid-template-columns:1fr} #margin{display:none} .grid2{grid-template-columns:1fr} }
+
+  #rep-page.wide{max-width:1200px}
+  .rep{display:grid;grid-template-columns:260px 1fr;gap:18px;align-items:start}
+  .rep .qlist{position:sticky;top:60px;display:flex;flex-direction:column;gap:6px}
+  .rep .qrow{padding:8px 10px;border:1px solid var(--line,#ddd);border-radius:8px;cursor:pointer;font-size:13px;background:var(--panel,#fff)}
+  .rep .qrow.cur{outline:2px solid #3b6fd4}
+  .rep .qrow .f{font-size:11px;opacity:.65}
+  .rep .qrow.done::before{content:"✓ ";color:#2a8a4a;font-weight:700}
+  .rep h3{margin:.2em 0}
+  .rep .facts li{margin:.35em 0;line-height:1.45}
+  .rep .cover li{margin:.2em 0}
+  .rep .card{border:1px solid var(--line,#ddd);border-radius:8px;padding:8px 10px;margin:8px 0;background:var(--panel,#fff)}
+  .rep .card .why{font-weight:600;font-size:13px}
+  .rep .card .meta{font-size:12px;opacity:.75;margin:2px 0}
+  .rep .mini{font-size:12.5px;line-height:1.4;margin-top:6px}
+  .rep .mini div{margin:3px 0;padding:3px 6px;border-left:3px solid #aab}
+  .rep .mini .u{border-color:#3b6fd4}.rep .mini .a{border-color:#2a8a4a}.rep .mini .c{border-color:#c28a1a}.rep .mini .r{border-color:#999;opacity:.85}
+  .rep .mini pre{white-space:pre-wrap;margin:2px 0;font-size:11.5px}
+  .rep textarea{width:100%;min-height:200px;font:14px/1.5 system-ui,sans-serif;padding:10px;border-radius:8px;border:1px solid var(--line,#bbb);box-sizing:border-box}
+  .rep .savestate{font-size:12px;opacity:.7;min-height:1.2em}
+  @media (max-width:900px){ .rep{grid-template-columns:1fr} .rep .qlist{position:static} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cartwheel <span>review</span></h1>
+  <div class="tabs" id="tabs">
+    <button data-view="review" class="active">Review</button>
+    <button data-view="taxonomy">Taxonomy</button>
+    <button data-view="labels">Labels</button>
+    <button data-view="suggestions">Suggestions <span class="pill" id="sugg-count">0</span></button>
+    <button data-view="progress">Progress</button>
+    <button data-view="report">Report <span class="pill" id="rep-count">0</span></button>
+  </div>
+  <span class="pill" id="prog-pill"></span>
+  <div class="grow"></div>
+  <input id="jump" placeholder="jump to trace id…" size="18" />
+  <button id="prev" title="previous session (←)">←</button>
+  <span class="pill" id="pos">0 / 0</span>
+  <button id="next" title="next session (→)">→</button>
+</header>
+<div id="banner"></div>
+
+<section id="review" class="view active">
+  <aside id="rail">
+    <div class="filters">
+      <select id="f-batch"><option value="">all batches</option><option value="1">batch 1</option><option value="2">batch 2</option><option value="3">batch 3</option><option value="4">batch 4</option></select>
+      <select id="f-role"><option value="">all roles</option><option>shopper</option><option>merchant</option><option>support</option></select>
+      <select id="f-status"><option value="">any status</option><option value="unreviewed">has unreviewed</option><option value="noted">noted</option><option value="clear">no failure observed</option></select>
+      <label><input type="checkbox" id="f-all" /> include unsampled sessions</label>
+      <label><input type="checkbox" id="f-collapse" /> collapse tool results</label>
+    </div>
+    <div id="rail-list"></div>
+  </aside>
+  <div id="main">
+    <div class="shead" id="shead"></div>
+    <div class="wrap"><div id="conv"></div><div id="margin"></div></div>
+  </div>
+</section>
+
+<section id="taxonomy" class="view"><div class="page" id="tax-page"></div></section>
+<section id="labels" class="view"><div class="page" id="lab-page"></div></section>
+<section id="suggestions" class="view"><div class="page" id="sug-page"></div></section>
+<section id="progress" class="view"><div class="page" id="prog-page"></div></section>
+<section id="report" class="view"><div class="page wide" id="rep-page"></div></section>
+
+<div id="pop"><input id="pop-in" placeholder="what went wrong? (Enter to save, Esc to cancel)" /><div class="hint">first failure only, in your own words. No category yet.</div></div>
+<div id="toast"></div>
+
+<script>
+const SPEC_IDS = ["PURPOSE-1","SCOPE-1","SCOPE-2","AUTH-1","TOOL-1","TOOL-2","TOOL-3","TOOL-4","TOOL-5","TOOL-6","TOOL-7","TOOL-8","TOOL-9","ESC-1","ESC-2","ESC-3","ESC-4","RESP-1","RESP-2","RESP-3","RESP-4","RESP-5"];
+const S = { d:null, view:'review', cur:0, list:[], focusAnn:null, pending:null };
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pretty = (v)=>typeof v==='string' ? v : JSON.stringify(v,null,2);
+const short = (id)=>String(id).slice(0,8);
+
+function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='show'+(err?' err':''); clearTimeout(toast._t); toast._t=setTimeout(()=>t.className='',err?4500:1800); }
+async function api(path, body){
+  const r = await fetch(path, body===undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  const j = await r.json().catch(()=>({error:'bad response'}));
+  if(!r.ok){ toast(j.error||('error '+r.status), true); throw new Error(j.error||r.status); }
+  return j;
+}
+async function load(full=true){
+  const j = await api('/api/state'+(full?'':'?sessions=0'));
+  if(full){ S.d = j; } else { Object.assign(S.d, j, {sessions:S.d.sessions}); }
+  derive();
+}
+
+/* ---------- derived state ---------- */
+function derive(){
+  const d=S.d;
+  d.sampled = {}; d.manifest.entries.forEach(e=>d.sampled[e.trace_id]=e);
+  d.annBy = {}; d.annotations.filter(a=>!a.deleted).forEach(a=>(d.annBy[a.trace_id] ||= []).push(a));
+  d.annById = {}; d.annotations.forEach(a=>d.annById[a.id]=a);
+  d.sessById = {}; d.sessions.forEach(s=>d.sessById[s.session_id]=s);
+  d.traceSess = {}; d.sessions.forEach(s=>s.turns.forEach(t=>d.traceSess[t.trace_id]=s));
+  d.modeNames = d.patterns.map(m=>m.name);
+}
+function traceStatus(tid){
+  if(!S.d.sampled[tid]) return null;
+  const a = S.d.annBy[tid]||[];
+  if(a.some(x=>x.kind==='note')) return 'noted';
+  if(a.some(x=>x.kind==='no_failure')) return 'clear';
+  return 'unreviewed';
+}
+function sessionStatus(s){
+  const st = s.turns.map(t=>traceStatus(t.trace_id)).filter(Boolean);
+  if(!st.length) return 'none';
+  if(st.includes('unreviewed')) return 'unreviewed';
+  return st.includes('noted') ? 'noted' : 'clear';
+}
+function filteredSessions(){
+  const f = {batch:$('f-batch').value, role:$('f-role').value, status:$('f-status').value, all:$('f-all').checked};
+  return S.d.sessions.filter(s=>{
+    const sampled = s.turns.filter(t=>S.d.sampled[t.trace_id]);
+    if(!f.all && !sampled.length) return false;
+    if(f.role && s.role!==f.role) return false;
+    if(f.batch && !sampled.some(t=>String(S.d.sampled[t.trace_id].batch)===f.batch)) return false;
+    if(f.status){ const st = s.turns.map(t=>traceStatus(t.trace_id)).filter(Boolean);
+      if(f.status==='unreviewed' && !st.includes('unreviewed')) return false;
+      if(f.status==='noted' && !st.includes('noted')) return false;
+      if(f.status==='clear' && !st.includes('clear')) return false; }
+    return true;
+  });
+}
+
+/* ---------- views / tabs ---------- */
+function setView(v){
+  S.view=v;
+  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active', e.id===v));
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active', b.dataset.view===v));
+  render();
+}
+function render(){
+  if(!S.d) return;
+  renderChrome();
+  if(S.view==='review') renderReview();
+  if(S.view==='taxonomy') renderTaxonomy();
+  if(S.view==='labels') renderLabels();
+  if(S.view==='suggestions') renderSuggestions();
+  if(S.view==='progress') renderProgress();
+  if(S.view==='report') renderReport();
+}
+function renderChrome(){
+  const m=S.d.meta, b=$('banner');
+  const bits=[];
+  if(m.note && (m.note.includes('unavailable')||m.note.includes('cache'))) bits.push(m.note);
+  if(m.offline) bits.push('Offline mode: judgments are saved locally and NOT written to Langfuse.');
+  b.style.display = bits.length?'block':'none'; b.textContent = bits.join('  ');
+  const ent=S.d.manifest.entries.length;
+  const reviewed = S.d.manifest.entries.filter(e=>traceStatus(e.trace_id)!=='unreviewed').length;
+  $('prog-pill').textContent = `${reviewed}/${ent} sampled traces reviewed · target ≥100`;
+  const pend = S.d.suggestions.filter(s=>s.status==='pending').length;
+  $('sugg-count').textContent = pend;
+}
+
+/* ---------- review view ---------- */
+function renderRail(){
+  S.list = filteredSessions();
+  if(S.cur>=S.list.length) S.cur = Math.max(0,S.list.length-1);
+  const box=$('rail-list'); box.innerHTML='';
+  if(!S.list.length){ box.innerHTML='<div class="empty">No sessions match. The sample may be empty: build it with the sampling script.</div>'; }
+  S.list.forEach((s,i)=>{
+    const row=document.createElement('div'); row.className='srow'+(i===S.cur?' cur':'');
+    const sampled=s.turns.filter(t=>S.d.sampled[t.trace_id]).length;
+    row.innerHTML=`<span class="dot ${sessionStatus(s)}"></span><div class="t"><b>${esc(s.role||'?')}</b> · ${s.turns.length} turn${s.turns.length>1?'s':''} · ${sampled} sampled<span>${esc(short(s.session_id))} · ${esc(firstUser(s))}</span></div>`;
+    row.onclick=()=>{S.cur=i; render();};
+    box.appendChild(row);
+  });
+  $('pos').textContent = `${S.list.length?S.cur+1:0} / ${S.list.length}`;
+}
+function firstUser(s){ const m=(s.turns[0].messages||[]).find(m=>m.role==='user'); return (m&&m.text||'').slice(0,60); }
+function curSession(){ return S.list[S.cur]; }
+
+function msgEl(m, tid, i, sampled){
+  const role=m.role||'assistant';
+  const wrap=document.createElement('div'); wrap.className='msg'; wrap.dataset.role=role;
+  const head=document.createElement('div'); head.className='role'; head.textContent=role.replace('_',' ')+(m.name?' · '+m.name:'');
+  wrap.appendChild(head);
+  const ann=(txt,ref,cls)=>{ const e=document.createElement(cls==='pre'?'pre':'div'); e.className=cls==='pre'?'j':'text'; e.textContent=txt; if(sampled){ e.classList.add('annotatable'); e.dataset.trace=tid; e.dataset.ref=ref; } return e; };
+  if(role==='tool_call'){
+    wrap.appendChild(ann(pretty(m.arguments??{}), String(i), 'pre'));
+  } else if(role==='tool_result'){
+    const c=m.content; const okv = c && typeof c==='object' ? c.ok : undefined;
+    if(okv!==undefined){ const b=document.createElement('span'); b.className='ok '+(okv?'t':'f'); b.textContent='ok: '+okv; head.appendChild(b); }
+    if(c && typeof c==='object' && Array.isArray(c.results) && c.results.every(r=>r&&r.policy_id)){
+      const box=document.createElement('div');
+      c.results.forEach((r,k)=>{
+        const card=document.createElement('div'); card.className='card';
+        const h=document.createElement('div'); h.className='ch';
+        h.innerHTML=`<code>${esc(r.policy_id)}</code><b>${esc(r.title||'')}</b><span class="pill">score ${esc(r.score??r.retrieval_score??'')}</span>`;
+        card.appendChild(h);
+        const sn=document.createElement('div'); sn.className='sn'; sn.textContent=r.snippet||''; if(sampled){ sn.classList.add('annotatable'); sn.dataset.trace=tid; sn.dataset.ref=`${i}:r${k}`; }
+        card.appendChild(sn); box.appendChild(card);
+      });
+      const extra = Object.keys(c).filter(k=>!['ok','results'].includes(k));
+      if(extra.length){ const x=document.createElement('pre'); x.className='j'; x.textContent=pretty(Object.fromEntries(extra.map(k=>[k,c[k]]))); box.appendChild(x); }
+      wrap.appendChild(box);
+      const raw=document.createElement('details'); raw.innerHTML='<summary>raw result</summary>'; const p=document.createElement('pre'); p.className='j'; p.textContent=pretty(c); raw.appendChild(p); wrap.appendChild(raw);
+    } else {
+      const txt=pretty(c); const el=ann(txt, String(i), 'pre');
+      if($('f-collapse').checked && txt.length>400){ const d=document.createElement('details'); d.innerHTML=`<summary>result (${txt.length} chars)</summary>`; d.appendChild(el); wrap.appendChild(d); }
+      else wrap.appendChild(el);
+    }
+  } else {
+    wrap.appendChild(ann(m.text!==undefined?m.text:pretty(m.content), String(i), 'text'));
+  }
+  return wrap;
+}
+
+function renderTurn(s, t, n){
+  const e=S.d.sampled[t.trace_id];
+  const box=document.createElement('div'); box.className='turn'+(e?'':' ctx'); box.dataset.trace=t.trace_id;
+  const h=document.createElement('div'); h.className='thead';
+  h.innerHTML=`<b>Turn ${n+1}</b><span class="mono">${esc(short(t.trace_id))}</span><span>${esc((t.timestamp||'').slice(0,19).replace('T',' '))}</span>`
+    + (e?`<span class="pill">batch ${e.batch} · ${esc(e.reason)}</span>`:'<span class="pill warn">context only, not in your sample</span>');
+  box.appendChild(h);
+  // group a tool_call with its immediately following result
+  const ms=t.messages||[]; let i=0;
+  while(i<ms.length){
+    const m=ms[i];
+    if(m.role==='tool_call'){
+      const step=document.createElement('div'); step.className='step'; step.appendChild(msgEl(m,t.trace_id,i,!!e));
+      if(i+1<ms.length && ms[i+1].role==='tool_result'){ step.appendChild(msgEl(ms[i+1],t.trace_id,i+1,!!e)); i++; }
+      box.appendChild(step);
+    } else box.appendChild(msgEl(m,t.trace_id,i,!!e));
+    i++;
+  }
+  if(e) box.appendChild(turnFooter(t.trace_id));
+  return box;
+}
+
+function turnFooter(tid){
+  const f=document.createElement('div'); f.className='tfoot';
+  const st=traceStatus(tid), notes=(S.d.annBy[tid]||[]).filter(a=>a.kind==='note').length;
+  const r=document.createElement('div'); r.className='row';
+  const clear=document.createElement('button'); clear.id='clear-'+tid; clear.className='clear-btn';
+  clear.textContent = st==='clear' ? '✓ No failure observed (click to undo)' : 'No failure observed';
+  clear.disabled = st==='noted';
+  clear.onclick=async()=>{ try{
+    if(st==='clear'){ const a=(S.d.annBy[tid]||[]).find(x=>x.kind==='no_failure'); await api('/api/annotation/delete',{id:a.id}); }
+    else await api('/api/annotation',{trace_id:tid,kind:'no_failure'});
+    await load(false); renderReview(); }catch(e){} };
+  const lab=document.createElement('span'); lab.className='pill';
+  lab.textContent = st==='noted' ? `${notes} failure note${notes>1?'s':''}` : st==='clear' ? 'reviewed: no failure' : 'unreviewed: select text to add a note';
+  r.append(clear, lab); f.appendChild(r);
+  if(S.d.patterns.length){
+    const hd=document.createElement('div'); hd.className='sync'; hd.textContent='Structured labels (1 = failure present). Judge every mode for this trace.'; f.appendChild(hd);
+    S.d.patterns.forEach(m=>{
+      const rec=(S.d.labels[m.name]||{})[tid];
+      const row=document.createElement('div'); row.className='lab-row';
+      const nm=document.createElement('span'); nm.className='mono'; nm.textContent=m.name;
+      const bp=document.createElement('button'); bp.className='pres'+(rec&&rec.label===1?' on':''); bp.textContent='Present'; bp.dataset.mode=m.name; bp.dataset.val='1';
+      const ba=document.createElement('button'); ba.className='abs'+(rec&&rec.label===0?' on':''); ba.textContent='Absent'; ba.dataset.mode=m.name; ba.dataset.val='0';
+      const ev=document.createElement('input'); ev.placeholder='evidence (e.g. tool result vs claim)'; ev.value=rec?rec.evidence||'':''; ev.disabled=!rec;
+      const cn=document.createElement('label'); cn.className='sync'; cn.innerHTML=`<input type="checkbox" ${rec&&rec.close_negative?'checked':''} ${rec&&rec.label===0?'':'disabled'}/> close negative`;
+      const save=async(label)=>{ try{ const out=await api('/api/label',{trace_id:tid,mode:m.name,label,evidence:ev.value,close_negative:cn.querySelector('input').checked}); if(out.langfuse_error) toast('Saved locally; Langfuse write failed: '+out.langfuse_error,true); await load(false); renderReview(); }catch(e){} };
+      bp.onclick=()=>save(1); ba.onclick=()=>save(0);
+      ev.onchange=()=>rec&&save(rec.label); cn.querySelector('input').onchange=()=>rec&&save(rec.label);
+      row.append(nm,bp,ba,ev,cn); f.appendChild(row);
+      if(rec && rec.langfuse_error){ const w=document.createElement('div'); w.className='sync bad'; w.textContent=`${m.name}: not synced to Langfuse (${rec.langfuse_error})`; f.appendChild(w); }
+    });
+  }
+  return f;
+}
+
+function renderReview(){
+  renderRail();
+  const s=curSession(), head=$('shead'), conv=$('conv'); conv.innerHTML=''; $('margin').innerHTML='';
+  if(!s){ head.innerHTML=''; return; }
+  head.innerHTML=`<span class="sid mono">${esc(short(s.session_id))}</span><span class="pill">role: ${esc(s.role||'?')}</span><span class="pill">store: ${esc(s.store??'?')}</span><span class="pill">prompt: ${esc(s.prompt_version??'?')}</span><span class="pill">scenario: ${esc(s.scenario_id??'?')}</span><span class="pill">${s.turns.length} turn${s.turns.length>1?'s':''}</span>`;
+  s.turns.forEach((t,n)=>conv.appendChild(renderTurn(s,t,n)));
+  applyHighlights(); layoutMargin();
+}
+
+/* ---------- highlights + margin ---------- */
+function itemsFor(el){
+  const tid=el.dataset.trace, ref=el.dataset.ref;
+  const anns=(S.d.annBy[tid]||[]).filter(a=>a.kind==='note'&&String(a.idx)===ref&&a.quote).map(a=>({...a,k:'human'}));
+  const sug=S.d.suggestions.filter(x=>x.status==='pending'&&x.trace_id===tid&&String(x.idx)===ref&&x.quote).map(x=>({...x,k:'sugg'}));
+  return [...anns,...sug];
+}
+function rangeOf(text,it){
+  if(Number.isInteger(it.start)&&Number.isInteger(it.end)&&text.slice(it.start,it.end)===it.quote) return [it.start,it.end];
+  const i=text.indexOf(it.quote); return i<0?null:[i,i+it.quote.length];
+}
+function applyHighlights(){
+  document.querySelectorAll('.annotatable').forEach(el=>{
+    const text=el.textContent, items=itemsFor(el); if(!items.length) return;
+    const ranges=items.map(it=>({it,r:rangeOf(text,it)})).filter(x=>x.r).sort((a,b)=>a.r[0]-b.r[0]);
+    let pos=0; const frag=document.createDocumentFragment();
+    ranges.forEach(({it,r})=>{ if(r[0]<pos) return;
+      frag.appendChild(document.createTextNode(text.slice(pos,r[0])));
+      const sp=document.createElement('span'); sp.className='hl'+(it.k==='sugg'?' sugg':''); sp.dataset.ann=it.id; sp.textContent=text.slice(r[0],r[1]);
+      sp.onclick=()=>focusAnn(it.id); frag.appendChild(sp); pos=r[1]; });
+    frag.appendChild(document.createTextNode(text.slice(pos)));
+    el.replaceChildren(frag);
+  });
+}
+function layoutMargin(){
+  const m=$('margin'), conv=$('conv'); m.innerHTML='';
+  const base=conv.getBoundingClientRect().top; let bottom=0;
+  const cards=[];
+  document.querySelectorAll('#conv .hl').forEach(sp=>{
+    const id=sp.dataset.ann; const a=S.d.annById[id]; const sg=S.d.suggestions.find(x=>x.id===id);
+    const it=a||sg; if(!it) return;
+    cards.push({id,top:sp.getBoundingClientRect().top-base,it,sg:!a});
+  });
+  cards.sort((a,b)=>a.top-b.top);
+  cards.forEach(c=>{
+    const d=document.createElement('div'); d.className='mcard'+(c.sg?' sugg':''); d.dataset.ann=c.id;
+    d.innerHTML=(c.sg?`<div class="tag">AI suggestion · ${esc(c.it.mode||'')}</div>`:'')+`<div class="q">“${esc(c.it.quote)}”</div><div>${esc(c.sg?(c.it.text||c.it.rationale||''):c.it.note)}</div>`;
+    if(c.sg){ const ac=document.createElement('div'); ac.className='acts';
+      const y=document.createElement('button'); y.className='acc'; y.textContent='Accept'; y.onclick=()=>decide(c.id,'accept');
+      const n=document.createElement('button'); n.className='rej'; n.textContent='Reject'; n.onclick=()=>decide(c.id,'reject');
+      ac.append(y,n); d.appendChild(ac); }
+    else { const ac=document.createElement('div'); ac.className='acts';
+      const ed=document.createElement('button'); ed.textContent='Edit'; ed.onclick=()=>editNote(c.id);
+      const del=document.createElement('button'); del.className='rej'; del.textContent='Delete'; del.onclick=()=>delNote(c.id);
+      ac.append(ed,del); d.appendChild(ac); }
+    d.onmouseenter=()=>focusAnn(c.id,true);
+    m.appendChild(d); const y=Math.max(c.top,bottom+6); d.style.top=y+'px'; bottom=y+d.offsetHeight;
+  });
+  m.style.height=Math.max(bottom,conv.offsetHeight)+'px';
+  if(S.focusAnn) focusAnn(S.focusAnn,true);
+}
+function focusAnn(id,quiet){
+  S.focusAnn=id;
+  document.querySelectorAll('.hl.focus,.mcard.focus').forEach(e=>e.classList.remove('focus'));
+  document.querySelectorAll(`[data-ann="${id}"]`).forEach(e=>e.classList.add('focus'));
+  if(!quiet){ const h=document.querySelector(`.hl[data-ann="${id}"]`); if(h) h.scrollIntoView({block:'center',behavior:'smooth'}); }
+}
+async function decide(id,decision){ try{ await api('/api/suggestion/decide',{id,decision}); await load(false); render(); toast(decision==='accept'?'Suggestion accepted: now your annotation':'Suggestion rejected'); }catch(e){} }
+async function delNote(id){ if(!confirm('Delete this note? It stays in the saved history.')) return; try{ await api('/api/annotation/delete',{id}); await load(false); render(); }catch(e){} }
+async function editNote(id){ const a=S.d.annById[id]; const v=prompt('Edit note (earlier text is kept in history):',a.note); if(v===null||!v.trim()) return;
+  try{ await api('/api/annotation',{...a,note:v}); await load(false); render(); }catch(e){} }
+
+/* ---------- annotation by text selection ---------- */
+function hidePop(){ $('pop').style.display='none'; if(S.pending){ S.pending=null; renderReview(); } }
+document.addEventListener('mouseup',(ev)=>{
+  if(S.view!=='review' || ev.target.closest('#pop')) return;
+  const sel=getSelection(); if(!sel||sel.isCollapsed||!sel.rangeCount){ return; }
+  const range=sel.getRangeAt(0);
+  const el=(range.commonAncestorContainer.nodeType===1?range.commonAncestorContainer:range.commonAncestorContainer.parentElement).closest('.annotatable');
+  if(!el){ const ctx=(range.commonAncestorContainer.nodeType===1?range.commonAncestorContainer:range.commonAncestorContainer.parentElement).closest('.turn.ctx'); if(ctx) toast('Context turn: not in your sample, so it cannot be annotated.'); return; }
+  const quote=range.toString(); if(!quote.trim()) return;
+  const pre=document.createRange(); pre.selectNodeContents(el); pre.setEnd(range.startContainer,range.startOffset);
+  const start=pre.toString().length;
+  S.pending={trace_id:el.dataset.trace,idx:el.dataset.ref,quote,start,end:start+quote.length};
+  const rect=range.getBoundingClientRect(); const pop=$('pop');
+  pop.style.display='block'; pop.style.left=Math.min(window.scrollX+rect.left,window.innerWidth-340)+'px'; pop.style.top=(window.scrollY+rect.bottom+6)+'px';
+  $('pop-in').value=''; setTimeout(()=>$('pop-in').focus(),0);
+});
+$('pop-in').addEventListener('keydown',async(e)=>{
+  if(e.key==='Escape'){ hidePop(); }
+  if(e.key==='Enter'){ const note=e.target.value.trim(); if(!note||!S.pending) return;
+    const p=S.pending; S.pending=null; $('pop').style.display='none';
+    try{ await api('/api/annotation',{...p,kind:'note',note}); await load(false); renderReview(); toast('Note saved'); }catch(err){ renderReview(); } }
+});
+
+/* ---------- taxonomy ---------- */
+function annLine(a){ const s=S.d.traceSess[a.trace_id]; return `<div style="margin:4px 0"><span class="link" data-open="${a.trace_id}">${esc(short(a.trace_id))}</span> · “${esc((a.quote||'').slice(0,70))}” — ${esc(a.note)}</div>`; }
+function renderTaxonomy(){
+  const page=$('tax-page'); const modes=S.d.patterns;
+  const notes=S.d.annotations.filter(a=>!a.deleted&&a.kind==='note');
+  const linked=new Set(modes.flatMap(m=>m.created_from||[]));
+  const unassigned=notes.filter(a=>!linked.has(a.id));
+  let h=`<h2>Failure modes (${modes.length}; target 5 to 8)</h2><div class="grid2"><div>`;
+  h+=`<div class="panel"><b>New mode</b> <input id="nm-name" placeholder="snake_case_name" size="26"/> <button id="nm-add">Create</button><div class="sync">Name the observed failure, not a bucket. Axial coding: group notes that one product change would fix.</div></div>`;
+  modes.forEach(m=>{
+    const recs=S.d.labels[m.name]||{}; const pos=Object.values(recs).filter(r=>r.label===1), neg=Object.values(recs).filter(r=>r.label===0&&r.close_negative);
+    const src=(m.created_from||[]).map(id=>S.d.annById[id]).filter(a=>a&&!a.deleted);
+    h+=`<div class="panel mode" data-mode="${esc(m.name)}"><h3>${esc(m.name)} <span class="pill ${pos.length>=3?'':'warn'}">positives ${pos.length}/3</span><span class="pill ${neg.length>=3?'':'warn'}">close negatives ${neg.length}/3</span><span class="pill">${esc(m.status)}</span></h3>
+      <label>Binary definition (another reviewer must be able to apply it)</label><textarea rows="3" data-f="definition">${esc(m.definition)}</textarea>
+      <label>Boundary vs nearest neighboring mode</label><textarea rows="2" data-f="boundary">${esc(m.boundary)}</textarea>
+      <div class="two"><div><label>Requirement source (SPEC.md id or revision)</label><input list="specids" data-f="requirement" value="${esc(m.requirement)}"/></div>
+      <div><label>Likely evaluator</label><select data-f="evaluator">${['','code check','LLM judge'].map(o=>`<option ${m.evaluator===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div><label>Nearest neighbor</label><select data-f="neighbor"><option value=""></option>${modes.filter(x=>x.name!==m.name).map(x=>`<option ${m.neighbor===x.name?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div></div>
+      <div style="margin-top:8px"><button data-save="${esc(m.name)}">Save mode</button> <select data-status="${esc(m.name)}">${['candidate','confirmed'].map(o=>`<option ${m.status===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <label>Originating annotations (${src.length})</label>${src.map(a=>annLine(a)+`<span class="link" data-unlink="${esc(m.name)}|${a.id}">unlink</span>`).join('')||'<div class="empty">none yet</div>'}
+      <label>Positives</label><div>${pos.map(r=>`<span class="link" data-open="${r.trace_id}">${esc(short(r.trace_id))}</span>`).join(' ')||'<span class="empty">none</span>'}</div>
+      <label>Close negatives</label><div>${neg.map(r=>`<span class="link" data-open="${r.trace_id}">${esc(short(r.trace_id))}</span>`).join(' ')||'<span class="empty">none</span>'}</div>
+      <details><summary>history (${m.history.length})</summary>${m.history.map(x=>`<div class="sync">${esc(x.ts)} · ${esc(x.field)}: ${esc(x.old??x.added??x.removed??'')} → ${esc(x.new??'')}</div>`).join('')}</details></div>`;
+  });
+  h+=`</div><div><div class="panel"><b>Unassigned open codes (${unassigned.length})</b><div class="sync">Attach each note to a mode only after you have inspected the supporting traces.</div>`;
+  unassigned.forEach(a=>{ h+=annLine(a)+`<select data-assign="${a.id}"><option value="">assign to…</option>${modes.map(m=>`<option>${esc(m.name)}</option>`).join('')}</select>`; });
+  h+=`</div></div></div><datalist id="specids">${SPEC_IDS.map(i=>`<option value="${i}">`).join('')}</datalist>`;
+  page.innerHTML=h;
+  page.querySelectorAll('[data-open]').forEach(e=>e.onclick=()=>openTrace(e.dataset.open));
+  $('nm-add').onclick=async()=>{ try{ await api('/api/mode',{name:$('nm-name').value.trim()}); await load(false); renderTaxonomy(); }catch(e){} };
+  page.querySelectorAll('[data-save]').forEach(b=>b.onclick=async()=>{ const box=b.closest('.mode'); const body={name:b.dataset.save, status:box.querySelector('[data-status]').value};
+    box.querySelectorAll('[data-f]').forEach(f=>body[f.dataset.f]=f.value);
+    try{ await api('/api/mode',body); await load(false); renderTaxonomy(); toast('Mode saved (change recorded in history)'); }catch(e){} });
+  page.querySelectorAll('[data-assign]').forEach(s=>s.onchange=async()=>{ if(!s.value) return; try{ await api('/api/mode/link',{name:s.value,annotation_id:s.dataset.assign,linked:true}); await load(false); renderTaxonomy(); }catch(e){} });
+  page.querySelectorAll('[data-unlink]').forEach(l=>l.onclick=async()=>{ const [n,id]=l.dataset.unlink.split('|'); try{ await api('/api/mode/link',{name:n,annotation_id:id,linked:false}); await load(false); renderTaxonomy(); }catch(e){} });
+}
+function openTrace(tid){
+  const s=S.d.traceSess[tid]; if(!s) return;
+  $('f-all').checked=true; $('f-batch').value=''; $('f-role').value=''; $('f-status').value='';
+  S.list=filteredSessions(); S.cur=Math.max(0,S.list.findIndex(x=>x.session_id===s.session_id));
+  setView('review'); setTimeout(()=>{ const t=document.querySelector(`.turn[data-trace="${tid}"]`); if(t) t.scrollIntoView({block:'start'}); },50);
+}
+
+/* ---------- labels matrix ---------- */
+function renderLabels(){
+  const page=$('lab-page'), modes=S.d.patterns, entries=S.d.manifest.entries;
+  if(!modes.length){ page.innerHTML='<h2>Labels</h2><div class="panel empty">Define modes in the Taxonomy view first. Every sampled trace then needs one present/absent judgment per mode.</div>'; return; }
+  const only=page.dataset.only==='1';
+  let miss=0; entries.forEach(e=>modes.forEach(m=>{ if(!(S.d.labels[m.name]||{})[e.trace_id]) miss++; }));
+  let h=`<h2>Labels: ${entries.length} traces × ${modes.length} modes</h2><div class="panel"><label><input type="checkbox" id="only" ${only?'checked':''}/> only traces with missing judgments</label> <span class="pill ${miss?'warn':''}">${miss} missing</span> <div class="sync">Click a cell to set Present (red) or Absent (green); click again to flip. A judgment cannot be returned to unset once written to Langfuse.</div></div>`;
+  h+=`<table><tr><th>trace</th><th>role</th><th>batch</th><th>review</th>${modes.map(m=>`<th class="mono">${esc(m.name)}</th>`).join('')}</tr>`;
+  entries.forEach(e=>{
+    const row=modes.map(m=>(S.d.labels[m.name]||{})[e.trace_id]);
+    if(only && row.every(Boolean)) return;
+    const s=S.d.traceSess[e.trace_id];
+    h+=`<tr><td><span class="link" data-open="${e.trace_id}">${esc(short(e.trace_id))}</span></td><td>${esc(s?s.role:'')}</td><td>${e.batch}</td><td>${esc(traceStatus(e.trace_id))}</td>`
+      +row.map((r,i)=>`<td class="cell"><button data-t="${e.trace_id}" data-m="${esc(modes[i].name)}" class="${r?(r.label===1?'p':'a'):''}">${r?(r.label===1?'Present':'Absent'):'—'}</button></td>`).join('')+'</tr>';
+  });
+  h+='</table>'; page.innerHTML=h;
+  $('only').onchange=(ev)=>{ page.dataset.only=ev.target.checked?'1':'0'; renderLabels(); };
+  page.querySelectorAll('[data-open]').forEach(x=>x.onclick=()=>openTrace(x.dataset.open));
+  page.querySelectorAll('td.cell button').forEach(b=>b.onclick=async()=>{ const r=(S.d.labels[b.dataset.m]||{})[b.dataset.t]; const label=r?(r.label===1?0:1):1;
+    try{ await api('/api/label',{trace_id:b.dataset.t,mode:b.dataset.m,label,evidence:r?r.evidence:'',close_negative:r&&label===0?r.close_negative:false}); await load(false); renderLabels(); }catch(e){} });
+}
+
+/* ---------- suggestions ---------- */
+function renderSuggestions(){
+  const page=$('sug-page'), all=S.d.suggestions;
+  let h=`<h2>AI suggestions (hypotheses, never labels)</h2><div class="panel sync">Suggestions come from retrieval you ran with the coding agent. Nothing counts until you accept it. Accepting creates your annotation; rejecting is recorded.</div>`;
+  if(!all.length) h+='<div class="panel empty">No suggestions yet.</div>';
+  else { h+='<table><tr><th>status</th><th>mode</th><th>trace</th><th>quote</th><th></th></tr>';
+    all.forEach(s=>{ h+=`<tr><td>${esc(s.status)}</td><td class="mono">${esc(s.mode||'')}</td><td><span class="link" data-open="${s.trace_id}">${esc(short(s.trace_id))}</span></td><td>“${esc((s.quote||'').slice(0,90))}”<div class="sync">${esc(s.rationale||s.text||'')}</div></td><td>${s.status==='pending'?`<button class="acc" data-d="accept" data-id="${s.id}">Accept</button> <button class="rej" data-d="reject" data-id="${s.id}">Reject</button>`:''}</td></tr>`; });
+    h+='</table>'; }
+  page.innerHTML=h;
+  page.querySelectorAll('[data-open]').forEach(x=>x.onclick=()=>openTrace(x.dataset.open));
+  page.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>decide(b.dataset.id,b.dataset.d));
+}
+
+/* ---------- progress ---------- */
+async function renderProgress(){
+  const p=await api('/api/progress'); const page=$('prog-page');
+  const pct=Math.min(100,Math.round(100*p.total_reviewed/p.min_required));
+  let h=`<h2>Review progress</h2><div class="panel"><b>${p.total_reviewed}</b> reviewed of <b>${p.total_sampled}</b> sampled · requirement: ≥ ${p.min_required} distinct traces<div class="bar"><i style="width:${pct}%"></i></div><div class="sync">${p.unreviewed} sampled trace(s) still unreviewed · ${p.pending_suggestions} suggestion(s) pending</div></div>`;
+  h+='<table><tr><th>batch</th><th>sampled</th><th>target</th><th>reviewed</th></tr>';
+  Object.entries(p.batches).forEach(([b,v])=>h+=`<tr><td>${b}</td><td>${v.sampled}</td><td>${v.target}</td><td>${v.reviewed}</td></tr>`);
+  h+='</table>';
+  h+=`<h2>Taxonomy (${p.mode_count} modes; target 5 to 8) · ${p.missing_judgments} missing judgment(s)</h2>`;
+  if(!p.mode_count) h+='<div class="panel empty">No modes yet.</div>';
+  else { h+='<table><tr><th>mode</th><th>present</th><th>absent</th><th>close neg.</th><th>missing</th><th>sample fraction</th><th>first seen (batch)</th></tr>';
+    Object.entries(p.modes).forEach(([n,v])=>h+=`<tr><td class="mono">${esc(n)}</td><td>${v.present}</td><td>${v.absent}</td><td>${v.close_negatives}</td><td>${v.missing}</td><td>${v.sample_fraction==null?'—':(v.sample_fraction*100).toFixed(1)+'%'}</td><td>${v.first_seen_batch??'—'}</td></tr>`);
+    h+='</table>'; }
+  h+=`<h2>Stability check</h2><div class="panel">Modes whose originating notes first appear in batch 4: <b>${p.new_modes_first_seen_in_batch_4.length}</b> ${p.new_modes_first_seen_in_batch_4.map(n=>`<code>${esc(n)}</code>`).join(' ')}<div class="sync">Whether a new mode is consequential is your judgment. Fractions are sample fractions, not prevalence estimates.</div></div>`;
+  page.innerHTML=h;
+}
+
+
+/* ---------- report: written deliverables, answered next to the traces ---------- */
+S.rep = S.rep || {q:null,a:{},cur:0,timer:null,sync:''};
+async function loadReport(){ const j=await api('/api/report'); S.rep.q=j.questions; S.rep.a=j.answers; }
+function miniTrace(tid){
+  const t=(S.d.traceSess[tid]?S.d.traceSess[tid].turns:[]).find(x=>x.trace_id===tid); if(!t) return '';
+  const rows=(t.messages||[]).map(m=>{
+    if(m.role==='user') return `<div class="u"><b>user</b> ${esc(m.text)}</div>`;
+    if(m.role==='assistant') return `<div class="a"><b>assistant</b> ${esc(m.text)}</div>`;
+    if(m.role==='tool_call') return `<div class="c"><b>call</b> <code>${esc(m.name)}</code> <code>${esc(JSON.stringify(m.arguments))}</code></div>`;
+    const c=JSON.stringify(m.content); return `<div class="r"><b>result</b> <code>${esc(c.length>420?c.slice(0,420)+' …':c)}</code></div>`;
+  });
+  return `<div class="mini">${rows.join('')}</div>`;
+}
+function traceCard(c){
+  const tid=c.trace_id, s=S.d.traceSess[tid], e=S.d.sampled[tid];
+  const modes=S.d.patterns.filter(m=>((S.d.labels[m.name]||{})[tid]||{}).label===1).map(m=>m.name);
+  const notes=(S.d.annBy[tid]||[]).filter(a=>a.kind==='note').map(a=>`${a.source==='human'?'you':esc(a.source)}: “${esc(a.note)}”`);
+  const nf=(S.d.annBy[tid]||[]).some(a=>a.kind==='no_failure'&&a.source==='human');
+  return `<div class="card"><div class="why">${esc(c.why)}</div>
+    <div class="meta"><span class="mono">${esc(short(tid))}</span> · ${esc(s?s.role:'')} · batch ${e?e.batch:'—'} · modes present: ${modes.length?modes.map(m=>`<code>${esc(m)}</code>`).join(' '):'none'}${nf?' · you marked: no failure observed':''}</div>
+    ${notes.length?`<div class="meta">${notes.join('<br>')}</div>`:''}
+    <details><summary>read the trace</summary>${miniTrace(tid)}</details>
+    <button data-open="${tid}">open in Review ↗</button></div>`;
+}
+async function renderReport(){
+  const page=$('rep-page');
+  if(!S.rep.q){ try{ await loadReport(); }catch(e){ page.innerHTML='<div class="panel empty">Could not load the report questions.</div>'; return; } }
+  const Q=S.rep.q, A=S.rep.a; if(S.rep.cur>=Q.length) S.rep.cur=0; const q=Q[S.rep.cur];
+  const answered=Q.filter(x=>(A[x.id]||{}).text&&A[x.id].text.trim()).length;
+  $('rep-count').textContent=`${answered}/${Q.length}`;
+  const cur=(A[q.id]||{}).text||'';
+  const list=Q.map((x,i)=>`<div class="qrow ${i===S.rep.cur?'cur':''} ${((A[x.id]||{}).text||'').trim()?'done':''}" data-q="${i}">${esc(x.title)}<div class="f">${esc(x.file)}</div></div>`).join('');
+  page.innerHTML=`<h2>Written deliverables <span class="sync">${answered} of ${Q.length} answered</span></h2>
+  <div class="panel sync">Each box below is yours to write, in your own words. It saves as you type to <code>analysis/state/report_answers.json</code>. <b>Export</b> copies the answers into <code>analysis/report/</code> and removes the draft banner once a file has no open questions.
+   <button id="rep-export">Export to markdown</button> <span id="rep-sync" class="sync">${esc(S.rep.sync)}</span></div>
+  <div class="rep"><div class="qlist">${list}</div><div>
+   <h3>${esc(q.title)}</h3><div class="sync">${esc(q.file)} › ${esc(q.section)}</div>
+   <p><b>${esc(q.ask)}</b></p>
+   <details open><summary>Points to cover</summary><ul class="cover">${q.cover.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+   <details open><summary>What the data shows</summary><ul class="facts">${q.facts.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+   ${(q.links||[]).map(l=>`<button data-go="${esc(l[0])}">${esc(l[1])}</button>`).join(' ')}
+   ${q.traces.length?`<h4>Traces to look at</h4>${q.traces.map(traceCard).join('')}`:''}
+   <h4>Your answer</h4><textarea id="rep-ans" placeholder="Write in your own words…">${esc(cur)}</textarea>
+   <div class="savestate" id="rep-save"></div>
+  </div></div>`;
+  page.querySelectorAll('[data-q]').forEach(r=>r.onclick=()=>{ flushReport(); S.rep.cur=+r.dataset.q; renderReport(); });
+  page.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openTrace(b.dataset.open));
+  page.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ const g=b.dataset.go; if(g.startsWith('http')) window.open(g,'_blank','noopener'); else setView(g); });
+  const ta=$('rep-ans');
+  ta.oninput=()=>{ $('rep-save').textContent='typing…'; clearTimeout(S.rep.timer); S.rep.timer=setTimeout(flushReport,700); };
+  ta.onblur=flushReport;
+  $('rep-export').onclick=async()=>{ await flushReport(); try{ const r=await api('/api/report/export',{});
+    S.rep.sync=`exported ${r.written.length} answer(s); ${r.unanswered.length} still open${r.missing_markers.length?'; missing markers: '+r.missing_markers.join(', '):''}`; renderReport(); toast('Exported'); }catch(e){} };
+}
+async function flushReport(){
+  clearTimeout(S.rep.timer); const ta=$('rep-ans'); if(!ta||!S.rep.q) return;
+  const q=S.rep.q[S.rep.cur]; if(ta.value===((S.rep.a[q.id]||{}).text||'')) return;
+  try{ const r=await api('/api/report/answer',{id:q.id,text:ta.value}); S.rep.a[q.id]=r; const el=$('rep-save'); if(el) el.textContent='saved '+new Date().toLocaleTimeString();
+    const n=S.rep.q.filter(x=>((S.rep.a[x.id]||{}).text||'').trim()).length; $('rep-count').textContent=`${n}/${S.rep.q.length}`; }
+  catch(e){ const el=$('rep-save'); if(el) el.textContent='NOT saved: '+e.message; }
+}
+window.addEventListener('beforeunload',()=>{ try{ flushReport(); }catch(e){} });
+
+/* ---------- wiring ---------- */
+$('tabs').addEventListener('click',(e)=>{ const b=e.target.closest('button[data-view]'); if(b) setView(b.dataset.view); });
+['f-batch','f-role','f-status','f-all','f-collapse'].forEach(id=>$(id).addEventListener('change',()=>{S.cur=0;renderReview();}));
+$('prev').onclick=()=>{ if(S.cur>0){S.cur--;render();} }; $('next').onclick=()=>{ if(S.cur<S.list.length-1){S.cur++;render();} };
+$('jump').addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ const q=e.target.value.trim(); const hit=Object.keys(S.d.traceSess).find(t=>t===q||t.startsWith(q)); if(hit&&q) openTrace(hit); else toast('No trace with that id',true); } });
+document.addEventListener('keydown',(e)=>{ if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)||S.view!=='review') return;
+  if(e.key==='ArrowLeft') $('prev').click(); if(e.key==='ArrowRight') $('next').click(); });
+window.addEventListener('resize',()=>{ if(S.view==='review') layoutMargin(); });
+document.addEventListener('toggle',()=>{ if(S.view==='review') layoutMargin(); },true);
+load(true).then(render).catch(()=>{ $('shead').textContent='Could not load state. Is the server running?'; });
+</script>
+</body>
+</html>

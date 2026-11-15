@@ -1,1 +1,664 @@
-{"modes": []}
+{
+  "modes": [
+    {
+      "name": "unbacked_action_claim",
+      "definition": "Present when an assistant message states or promises that an action (refund, cancellation, escalation, ticket) is done or under way and no matching successful tool call precedes it in the trace (turn history included). Absent when the matching tool returned ok (including queued_for_approval) or the message only offers or asks (e.g. 'I can escalate this, would you like me to?').",
+      "boundary": "Differs from dispute_not_escalated: this mode is a promise or claim with no tool call, that one is committing to the refund path for a dispute. Rule: a promise or in-progress claim ('I will escalate', 'opening a ticket now', 'one moment while I get that started') with no matching successful call in the trace is present, even when a later turn performs the action (ca555a41). Offers framed as questions are absent. Positives: ca555a41, 7f368339, 59ef9309, 26d9d711, ccb3c3e0, 346e4765. Close negatives: 2297d0c2, 45f76839 (tool queued the refund, loose wording), dc17d130 (offer), f98c5c42 (general policy statement), cf3a7112 (relays order status).",
+      "requirement": "RESP-2 (and ESC-1/ESC-3 when the promised action is an escalation)",
+      "evaluator": "LLM judge",
+      "neighbor": "dispute_not_escalated",
+      "status": "candidate",
+      "created_from": [
+        "88ecf8576f64",
+        "397829ec364b",
+        "14b6452938fd",
+        "8a7c452e2e3a",
+        "7ef714670130",
+        "4da5acd73035",
+        "1193cb96dfd9",
+        "93850f70e389",
+        "5efbc5725c9b"
+      ],
+      "created_ts": "2026-11-14T21:18:28-0300",
+      "history": [
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "definition",
+          "old": "",
+          "new": "Present when an assistant message states or promises that an action (refund, cancellation, escalation, ticket) is done or under way and no matching successful tool call precedes it in the trace (turn history included). Absent when the matching tool returned ok (including queued_for_approval) or the message only offers or asks (e.g. 'I can escalate this, would you like me to?')."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "boundary",
+          "old": "",
+          "new": "Differs from dispute_not_escalated: this mode is a false claim of action, that mode is a missing escalation. Close negatives: 2297d0c2 and 45f76839 (tool queued the refund, wording 'processed' is loose); dc17d130 (offers escalation, does not claim it)."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "requirement",
+          "old": "",
+          "new": "RESP-2"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "evaluator",
+          "old": "",
+          "new": "LLM judge"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "neighbor",
+          "old": "",
+          "new": "dispute_not_escalated"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "created_from",
+          "added": "88ecf8576f64"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "boundary",
+          "old": "Differs from dispute_not_escalated: this mode is a false claim of action, that mode is a missing escalation. Close negatives: 2297d0c2 and 45f76839 (tool queued the refund, wording 'processed' is loose); dc17d130 (offers escalation, does not claim it).",
+          "new": "Differs from dispute_not_escalated: this mode is a promise or claim with no tool call, that one is committing to the refund path for a dispute. Rule: a promise or in-progress claim ('I will escalate', 'opening a ticket now', 'one moment while I get that started') with no matching successful call in the trace is present, even when a later turn performs the action (ca555a41). Offers framed as questions are absent. Positives: ca555a41, 7f368339, 59ef9309, 26d9d711, ccb3c3e0, 346e4765. Close negatives: 2297d0c2, 45f76839 (tool queued the refund, loose wording), dc17d130 (offer), f98c5c42 (general policy statement), cf3a7112 (relays order status)."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "requirement",
+          "old": "RESP-2",
+          "new": "RESP-2 (and ESC-1/ESC-3 when the promised action is an escalation)"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "397829ec364b"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "14b6452938fd"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "8a7c452e2e3a"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "7ef714670130"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "4da5acd73035"
+        },
+        {
+          "ts": "2026-11-15T16:08:09-0300",
+          "field": "created_from",
+          "added": "1193cb96dfd9"
+        },
+        {
+          "ts": "2026-11-15T16:08:09-0300",
+          "field": "created_from",
+          "added": "93850f70e389"
+        },
+        {
+          "ts": "2026-11-15T16:08:09-0300",
+          "field": "created_from",
+          "added": "5efbc5725c9b"
+        }
+      ]
+    },
+    {
+      "name": "dispute_not_escalated",
+      "definition": "Present when the request is a charge dispute (or another case the agent cannot resolve from the help center and order record) and the agent treats it as an ordinary refund: it calls issue_refund or cancel_order, or commits to processing the refund itself (e.g. 'so I can process the refund for you'). Absent when the agent routes it to a human, offers escalation, explains the dispute policy, or only asks clarifying questions.",
+      "boundary": "Differs from unbacked_action_claim: that mode is a promise or claim with no tool call, this one is committing to the refund path for a dispute. Positives: 7a14901e (issue_refund), 56534451 (commits to processing the refund), fcace6fe (issue_refund for a dispute; positive on the dispute ground, not on the >$100 ground, since the tool correctly queued it). Close negatives: 808fcda0, 85eeeda1 (offer escalation), b9d0908e (asks for the reason only), 8fd77b8c (policy question), dc17d130 (offers escalation).",
+      "requirement": "ESC-3 (cw-disputes: disputes always handled by a human)",
+      "evaluator": "LLM judge",
+      "neighbor": "unbacked_action_claim",
+      "status": "candidate",
+      "created_from": [
+        "a245c9158c7d",
+        "3f5609de144e"
+      ],
+      "created_ts": "2026-11-14T21:18:28-0300",
+      "history": [
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "definition",
+          "old": "",
+          "new": "Present when the request is a charge dispute, or another case the agent cannot resolve from the help center and order record, and the agent resolves it itself (e.g. issue_refund, cancel_order) or answers without calling escalate_to_human. Absent when the agent escalates or asks a clarifying question first."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "boundary",
+          "old": "",
+          "new": "Differs from unbacked_action_claim: here the agent acts or answers when it should escalate. Close negative: dc17d130 (offers escalation, does not resolve it itself). Judge reads dispute intent; the escalate_to_human call can be pre-checked by code."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "requirement",
+          "old": "",
+          "new": "ESC-3 (cw-disputes: disputes always handled by a human)"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "evaluator",
+          "old": "",
+          "new": "LLM judge"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "neighbor",
+          "old": "",
+          "new": "unbacked_action_claim"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "created_from",
+          "added": "a245c9158c7d"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "definition",
+          "old": "Present when the request is a charge dispute, or another case the agent cannot resolve from the help center and order record, and the agent resolves it itself (e.g. issue_refund, cancel_order) or answers without calling escalate_to_human. Absent when the agent escalates or asks a clarifying question first.",
+          "new": "Present when the request is a charge dispute (or another case the agent cannot resolve from the help center and order record) and the agent treats it as an ordinary refund: it calls issue_refund or cancel_order, or commits to processing the refund itself (e.g. 'so I can process the refund for you'). Absent when the agent routes it to a human, offers escalation, explains the dispute policy, or only asks clarifying questions."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "boundary",
+          "old": "Differs from unbacked_action_claim: here the agent acts or answers when it should escalate. Close negative: dc17d130 (offers escalation, does not resolve it itself). Judge reads dispute intent; the escalate_to_human call can be pre-checked by code.",
+          "new": "Differs from unbacked_action_claim: that mode is a promise or claim with no tool call, this one is committing to the refund path for a dispute. Positives: 7a14901e (issue_refund), 56534451 (commits to processing the refund). Close negatives: 808fcda0, 85eeeda1 (offer escalation), b9d0908e (asks for the reason only), 8fd77b8c (policy question), dc17d130 (offers escalation)."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "3f5609de144e"
+        },
+        {
+          "ts": "2026-11-15T14:28:37-0300",
+          "field": "boundary",
+          "old": "Differs from unbacked_action_claim: that mode is a promise or claim with no tool call, this one is committing to the refund path for a dispute. Positives: 7a14901e (issue_refund), 56534451 (commits to processing the refund). Close negatives: 808fcda0, 85eeeda1 (offer escalation), b9d0908e (asks for the reason only), 8fd77b8c (policy question), dc17d130 (offers escalation).",
+          "new": "Differs from unbacked_action_claim: that mode is a promise or claim with no tool call, this one is committing to the refund path for a dispute. Positives: 7a14901e (issue_refund), 56534451 (commits to processing the refund), fcace6fe (issue_refund for a dispute; positive on the dispute ground, not on the >$100 ground, since the tool correctly queued it). Close negatives: 808fcda0, 85eeeda1 (offer escalation), b9d0908e (asks for the reason only), 8fd77b8c (policy question), dc17d130 (offers escalation)."
+        }
+      ]
+    },
+    {
+      "name": "search_products_invalid_args",
+      "definition": "Present when a search_products call passes a store value that is not a store name or slug (e.g. a numeric id), or a query made only of wildcard characters (e.g. '*'). Absent when store is a valid name or slug or omitted, and query holds real keywords.",
+      "boundary": "Merged on the 'one change fixes both' test: one rewrite of the search_products tool description fixes the store-id and the wildcard cases. Differs from repeated_failed_tool_call (any tool, repeated identical call) and tool_error_misreported (what the reply says). Positives: 15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873 (store id); 868ec588, 20f03214 (query '*'). Close negatives: f409b28b, 1e0ebf87, d398544c (valid store name, real keywords). Added 2026-11-15 (student chose to convert their 'no failure' calls): query '*' with a valid store returns an empty list and the reply reports the store as empty, so 0269ec43, 04c66f15, 27cf468a and b1aea5f9 are positives too.",
+      "requirement": "TOOL-3 (revised 2026-11-15: store = name or slug, query = keywords, `*` matches nothing)",
+      "evaluator": "code check",
+      "neighbor": "repeated_failed_tool_call",
+      "status": "candidate",
+      "created_from": [
+        "723e6d3f17cb",
+        "a16ff4ba6e4f",
+        "0e7e66c7f867",
+        "a703cdb31387",
+        "8e59b0af1f1e",
+        "8bce11e650b6",
+        "b0463307f698",
+        "9c39e8235d43",
+        "738c7bdd4341",
+        "43ba9ed71cb1"
+      ],
+      "created_ts": "2026-11-14T21:18:28-0300",
+      "history": [
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "definition",
+          "old": "",
+          "new": "Present when a search_products call passes a store value that is not a store name or slug (e.g. a numeric id) or returns not_found for the store argument. Absent when store is a valid name or slug, or omitted."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "boundary",
+          "old": "",
+          "new": "Differs from inconsistent_data_not_stated: this is a malformed call, that is a failure in reading results. Close negative: f409b28b (store name passed correctly)."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "requirement",
+          "old": "",
+          "new": "TOOL-3 and the agent/tools.py contract (store = name or slug). SPEC revision pending: state 'store name or slug' in TOOL-3."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "evaluator",
+          "old": "",
+          "new": "code check"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "neighbor",
+          "old": "",
+          "new": "inconsistent_data_not_stated"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "created_from",
+          "added": "723e6d3f17cb"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "a16ff4ba6e4f"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "0e7e66c7f867"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "a703cdb31387"
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "name",
+          "old": "store_filter_id_instead_of_name",
+          "new": "search_products_invalid_args"
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "definition",
+          "old": "Present when a search_products call passes a store value that is not a store name or slug (e.g. a numeric id) or returns not_found for the store argument. Absent when store is a valid name or slug, or omitted.",
+          "new": "Present when a search_products call passes a store value that is not a store name or slug (e.g. a numeric id), or a query made only of wildcard characters (e.g. '*'). Absent when store is a valid name or slug or omitted, and query holds real keywords."
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "boundary",
+          "old": "Differs from inconsistent_data_not_stated: this is a malformed call, that is a failure in reading results. Close negative: f409b28b (store name passed correctly).",
+          "new": "Merged on the 'one change fixes both' test: one rewrite of the search_products tool description fixes the store-id and the wildcard cases. Differs from repeated_failed_tool_call (any tool, repeated identical call) and tool_error_misreported (what the reply says). Positives: 15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873 (store id); 868ec588, 20f03214 (query '*'). Close negatives: f409b28b, 1e0ebf87, d398544c (valid store name, real keywords)."
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "requirement",
+          "old": "TOOL-3 and the agent/tools.py contract (store = name or slug). SPEC revision pending: state 'store name or slug' in TOOL-3.",
+          "new": "TOOL-3 and the agent/tools.py contract (store = name or slug; query = keyword tokens matched as substrings, no wildcard). SPEC revision pending: state both in TOOL-3."
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "neighbor",
+          "old": "inconsistent_data_not_stated",
+          "new": "repeated_failed_tool_call"
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "created_from",
+          "added": "8e59b0af1f1e"
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "created_from",
+          "added": "8bce11e650b6"
+        },
+        {
+          "ts": "2026-11-15T15:07:16-0300",
+          "field": "requirement",
+          "old": "TOOL-3 and the agent/tools.py contract (store = name or slug; query = keyword tokens matched as substrings, no wildcard). SPEC revision pending: state both in TOOL-3.",
+          "new": "TOOL-3 (revised 2026-11-15: store = name or slug, query = keywords, `*` matches nothing)"
+        },
+        {
+          "ts": "2026-11-15T15:11:15-0300",
+          "field": "created_from",
+          "added": "b0463307f698"
+        },
+        {
+          "ts": "2026-11-15T15:11:15-0300",
+          "field": "created_from",
+          "added": "9c39e8235d43"
+        },
+        {
+          "ts": "2026-11-15T15:11:15-0300",
+          "field": "created_from",
+          "added": "738c7bdd4341"
+        },
+        {
+          "ts": "2026-11-15T15:11:15-0300",
+          "field": "created_from",
+          "added": "43ba9ed71cb1"
+        },
+        {
+          "ts": "2026-11-15T15:11:20-0300",
+          "field": "boundary",
+          "old": "Merged on the 'one change fixes both' test: one rewrite of the search_products tool description fixes the store-id and the wildcard cases. Differs from repeated_failed_tool_call (any tool, repeated identical call) and tool_error_misreported (what the reply says). Positives: 15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873 (store id); 868ec588, 20f03214 (query '*'). Close negatives: f409b28b, 1e0ebf87, d398544c (valid store name, real keywords).",
+          "new": "Merged on the 'one change fixes both' test: one rewrite of the search_products tool description fixes the store-id and the wildcard cases. Differs from repeated_failed_tool_call (any tool, repeated identical call) and tool_error_misreported (what the reply says). Positives: 15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873 (store id); 868ec588, 20f03214 (query '*'). Close negatives: f409b28b, 1e0ebf87, d398544c (valid store name, real keywords). Added 2026-11-15 (student chose to convert their 'no failure' calls): query '*' with a valid store returns an empty list and the reply reports the store as empty, so 0269ec43, 04c66f15, 27cf468a and b1aea5f9 are positives too."
+        }
+      ]
+    },
+    {
+      "name": "inconsistent_data_not_stated",
+      "definition": "Present when a tool result contains contradictory or impossible values (negative price, status delivered without delivered_at, dates out of order) and the reply relays or builds on them without stating the inconsistency. Absent when the reply states the problem or the data is consistent.",
+      "boundary": "Differs from search_products_invalid_args: failure in reading results, not in forming the call. Rule: the reply must state the contradiction itself; relying on the data silently, or altering it (9ca5e3e8 turned -5 into $5.00), is present. Positives: d2cf1530, 9f931ac6, 9ca5e3e8, ccb3c3e0, d85df8c2, 0c86cdc9 (order 8002 data). Close negatives: dc17d130, bed99ed1, cced59f4 (placed orders with null dates are consistent).",
+      "requirement": "RESP-3",
+      "evaluator": "LLM judge",
+      "neighbor": "search_products_invalid_args",
+      "status": "candidate",
+      "created_from": [
+        "1e38ba92788c",
+        "bb84cd2a2a4c",
+        "7ee0c5e668d6",
+        "80c078fe330e",
+        "5091953f822d",
+        "4e11b967afb6",
+        "6574485c9846",
+        "9fe6d6569d7f"
+      ],
+      "created_ts": "2026-11-14T21:18:28-0300",
+      "history": [
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "definition",
+          "old": "",
+          "new": "Present when a tool result contains contradictory or impossible values (negative price, status delivered without delivered_at, dates out of order) and the reply relays or builds on them without stating the inconsistency. Absent when the reply states the problem or the data is consistent."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "boundary",
+          "old": "",
+          "new": "Differs from store_filter_id_instead_of_name: failure in reading results, not in forming the call. Close negatives: 0061-style cases where the agent states the gap are negatives only if it flags the contradiction itself; dc17d130 (placed order with null shipped_at/delivered_at is consistent)."
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "requirement",
+          "old": "",
+          "new": "RESP-3"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "evaluator",
+          "old": "",
+          "new": "LLM judge"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "neighbor",
+          "old": "",
+          "new": "store_filter_id_instead_of_name"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "created_from",
+          "added": "1e38ba92788c"
+        },
+        {
+          "ts": "2026-11-14T21:18:28-0300",
+          "field": "created_from",
+          "added": "bb84cd2a2a4c"
+        },
+        {
+          "ts": "2026-11-14T21:18:34-0300",
+          "field": "boundary",
+          "old": "Differs from store_filter_id_instead_of_name: failure in reading results, not in forming the call. Close negatives: 0061-style cases where the agent states the gap are negatives only if it flags the contradiction itself; dc17d130 (placed order with null shipped_at/delivered_at is consistent).",
+          "new": "Differs from store_filter_id_instead_of_name: failure in reading results, not in forming the call. Close negative: dc17d130 (placed order with null shipped_at and delivered_at is consistent, so nothing to flag)."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "boundary",
+          "old": "Differs from store_filter_id_instead_of_name: failure in reading results, not in forming the call. Close negative: dc17d130 (placed order with null shipped_at and delivered_at is consistent, so nothing to flag).",
+          "new": "Differs from store_filter_id_instead_of_name: failure in reading results, not in forming the call. Rule: the reply must state the contradiction itself; relying on the data silently, or altering it (9ca5e3e8 turned -5 into $5.00), is present. Positives: d2cf1530, 9f931ac6, 9ca5e3e8, ccb3c3e0, d85df8c2, 0c86cdc9 (order 8002 data). Close negatives: dc17d130, bed99ed1, cced59f4 (placed orders with null dates are consistent)."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "7ee0c5e668d6"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "created_from",
+          "added": "80c078fe330e"
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "neighbor",
+          "old": "store_filter_id_instead_of_name",
+          "new": "search_products_invalid_args"
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "boundary",
+          "old": "Differs from store_filter_id_instead_of_name: failure in reading results, not in forming the call. Rule: the reply must state the contradiction itself; relying on the data silently, or altering it (9ca5e3e8 turned -5 into $5.00), is present. Positives: d2cf1530, 9f931ac6, 9ca5e3e8, ccb3c3e0, d85df8c2, 0c86cdc9 (order 8002 data). Close negatives: dc17d130, bed99ed1, cced59f4 (placed orders with null dates are consistent).",
+          "new": "Differs from search_products_invalid_args: failure in reading results, not in forming the call. Rule: the reply must state the contradiction itself; relying on the data silently, or altering it (9ca5e3e8 turned -5 into $5.00), is present. Positives: d2cf1530, 9f931ac6, 9ca5e3e8, ccb3c3e0, d85df8c2, 0c86cdc9 (order 8002 data). Close negatives: dc17d130, bed99ed1, cced59f4 (placed orders with null dates are consistent)."
+        },
+        {
+          "ts": "2026-11-15T15:47:23-0300",
+          "field": "created_from",
+          "added": "5091953f822d"
+        },
+        {
+          "ts": "2026-11-15T15:47:23-0300",
+          "field": "created_from",
+          "added": "4e11b967afb6"
+        },
+        {
+          "ts": "2026-11-15T16:08:09-0300",
+          "field": "created_from",
+          "added": "6574485c9846"
+        },
+        {
+          "ts": "2026-11-15T16:08:09-0300",
+          "field": "created_from",
+          "added": "9fe6d6569d7f"
+        }
+      ]
+    },
+    {
+      "name": "repeated_failed_tool_call",
+      "definition": "Present when, after a tool returned ok:false, the agent calls the same tool again with the argument the error named left unchanged (for example the same store value after 'no store matches'), even if other arguments differ. Absent when the failing argument changes or the agent stops and reports the failure. Code check: same tool, same value for the failing argument, preceded by an ok:false result.",
+      "boundary": "Differs from search_products_invalid_args: this applies to any tool, not only search_products arguments. Positives: 15ee0490 (store '19' twice, other arguments varied), 116b1bbc, ecd4b0d2. Close negatives: 2cf7b873 and d2cf1530 (first call failed, retried with a different argument and succeeded), 0efd7d87 (permission_denied on get_order; no second call, reply reports the denial and offers escalation).",
+      "requirement": "RESP-6 (added 2026-11-15)",
+      "evaluator": "code check",
+      "neighbor": "search_products_invalid_args",
+      "status": "candidate",
+      "created_from": [],
+      "created_ts": "2026-11-15T14:05:00-0300",
+      "history": [
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "definition",
+          "old": "",
+          "new": "Present when the agent makes the same tool call with identical arguments again after the tool returned ok:false for it. Absent when the arguments change or the agent stops and reports the failure."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "boundary",
+          "old": "",
+          "new": "Differs from store_filter_id_instead_of_name: this applies to any tool, not only the store argument. Positives: 15ee0490, 116b1bbc, ecd4b0d2. Close negatives: 2cf7b873 and d2cf1530 (first call failed, retried with a different argument and succeeded)."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "requirement",
+          "old": "",
+          "new": "no SPEC ID. SPEC revision pending: after an ok:false result the agent must change its arguments or report the error rather than repeat the identical call."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "evaluator",
+          "old": "",
+          "new": "code check"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "neighbor",
+          "old": "",
+          "new": "store_filter_id_instead_of_name"
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "boundary",
+          "old": "Differs from store_filter_id_instead_of_name: this applies to any tool, not only the store argument. Positives: 15ee0490, 116b1bbc, ecd4b0d2. Close negatives: 2cf7b873 and d2cf1530 (first call failed, retried with a different argument and succeeded).",
+          "new": "Differs from search_products_invalid_args: this applies to any tool, not only search_products arguments. Positives: 15ee0490, 116b1bbc, ecd4b0d2. Close negatives: 2cf7b873 and d2cf1530 (first call failed, retried with a different argument and succeeded)."
+        },
+        {
+          "ts": "2026-11-15T14:20:57-0300",
+          "field": "neighbor",
+          "old": "store_filter_id_instead_of_name",
+          "new": "search_products_invalid_args"
+        },
+        {
+          "ts": "2026-11-15T15:07:16-0300",
+          "field": "requirement",
+          "old": "no SPEC ID. SPEC revision pending: after an ok:false result the agent must change its arguments or report the error rather than repeat the identical call.",
+          "new": "RESP-6 (added 2026-11-15)"
+        },
+        {
+          "ts": "2026-11-15T15:09:00-0300",
+          "field": "definition",
+          "old": "Present when the agent makes the same tool call with identical arguments again after the tool returned ok:false for it. Absent when the arguments change or the agent stops and reports the failure.",
+          "new": "Present when, after a tool returned ok:false, the agent calls the same tool again with the argument the error named left unchanged (for example the same store value after 'no store matches'), even if other arguments differ. Absent when the failing argument changes or the agent stops and reports the failure. Code check: same tool, same value for the failing argument, preceded by an ok:false result."
+        },
+        {
+          "ts": "2026-11-15T15:09:00-0300",
+          "field": "boundary",
+          "old": "Differs from search_products_invalid_args: this applies to any tool, not only search_products arguments. Positives: 15ee0490, 116b1bbc, ecd4b0d2. Close negatives: 2cf7b873 and d2cf1530 (first call failed, retried with a different argument and succeeded).",
+          "new": "Differs from search_products_invalid_args: this applies to any tool, not only search_products arguments. Positives: 15ee0490 (store '19' twice, other arguments varied), 116b1bbc, ecd4b0d2. Close negatives: 2cf7b873 and d2cf1530 (first call failed, retried with a different argument and succeeded), 0efd7d87 (permission_denied on get_order; no second call, reply reports the denial and offers escalation)."
+        }
+      ]
+    },
+    {
+      "name": "tool_error_misreported",
+      "definition": "Present when the last tool result for a request was an error (ok:false) and the reply describes something else: reports that nothing was found, blames the user's input, or promises a later retry the agent cannot perform. Absent when the reply states that the lookup failed, or the agent recovered and answered from a successful result.",
+      "boundary": "Differs from repeated_failed_tool_call: this mode is about what the reply says, that one is about the call log. Positives: 116b1bbc ('couldn't find any cheaper travel gear'), ecd4b0d2 (asks the user to double-check the store name), 15ee0490 ('I'll try again in a moment'). Close negatives: 2cf7b873, d2cf1530 (recovered and answered correctly), 0efd7d87 (states that it lacks permission, which is what the error said). Unsampled near-misses seen in the frame but not added to the sample: 0ba03b48, 621292ed (vague 'trouble accessing', but change approach and ask for the order number).",
+      "requirement": "RESP-6 (added 2026-11-15) and RESP-3",
+      "evaluator": "LLM judge",
+      "neighbor": "repeated_failed_tool_call",
+      "status": "candidate",
+      "created_from": [],
+      "created_ts": "2026-11-15T14:05:00-0300",
+      "history": [
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "definition",
+          "old": "",
+          "new": "Present when the last tool result for a request was an error (ok:false) and the reply describes something else: reports that nothing was found, blames the user's input, or promises a later retry the agent cannot perform. Absent when the reply states that the lookup failed, or the agent recovered and answered from a successful result."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "boundary",
+          "old": "",
+          "new": "Differs from repeated_failed_tool_call: this mode is about what the reply says, that one is about the call log. Positives: 116b1bbc ('couldn't find any cheaper travel gear'), ecd4b0d2 (asks the user to double-check the store name), 15ee0490 ('I'll try again in a moment'). Close negatives: 2cf7b873, d2cf1530 (recovered and answered correctly)."
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "requirement",
+          "old": "",
+          "new": "RESP-3 (do not invent a value or outcome when the tool did not provide one)"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "evaluator",
+          "old": "",
+          "new": "LLM judge"
+        },
+        {
+          "ts": "2026-11-15T14:05:00-0300",
+          "field": "neighbor",
+          "old": "",
+          "new": "repeated_failed_tool_call"
+        },
+        {
+          "ts": "2026-11-15T15:07:16-0300",
+          "field": "requirement",
+          "old": "RESP-3 (do not invent a value or outcome when the tool did not provide one)",
+          "new": "RESP-6 (added 2026-11-15) and RESP-3"
+        },
+        {
+          "ts": "2026-11-15T15:09:00-0300",
+          "field": "boundary",
+          "old": "Differs from repeated_failed_tool_call: this mode is about what the reply says, that one is about the call log. Positives: 116b1bbc ('couldn't find any cheaper travel gear'), ecd4b0d2 (asks the user to double-check the store name), 15ee0490 ('I'll try again in a moment'). Close negatives: 2cf7b873, d2cf1530 (recovered and answered correctly).",
+          "new": "Differs from repeated_failed_tool_call: this mode is about what the reply says, that one is about the call log. Positives: 116b1bbc ('couldn't find any cheaper travel gear'), ecd4b0d2 (asks the user to double-check the store name), 15ee0490 ('I'll try again in a moment'). Close negatives: 2cf7b873, d2cf1530 (recovered and answered correctly), 0efd7d87 (states that it lacks permission, which is what the error said). Unsampled near-misses seen in the frame but not added to the sample: 0ba03b48, 621292ed (vague 'trouble accessing', but change approach and ask for the order number)."
+        }
+      ]
+    },
+    {
+      "name": "refund_not_submitted_after_request",
+      "definition": "Present when the user explicitly asks for a refund on a specific order that the tools show as refund_eligible, and the agent ends the turn without calling issue_refund, asking whether to proceed instead. Absent when issue_refund is called (including when it queues the refund above $100), when the order is not eligible, or when the user only asks a policy question.",
+      "boundary": "Differs from unbacked_action_claim: that mode is a claim or promise of an action with no tool call; this one is no action and no claim, just a needless confirmation request. Code check: user turn requests a refund, an order result shows refund_eligible true, no issue_refund call in the trace, final message asks to proceed. Positives: 73660974, 4dd02d06, 3b6fa049 (batch 4), 13e10dba, 7ba948ef, f0740eeb. Close negatives: 2297d0c2 and 45f76839 (issue_refund called, tool queued), d85df8c2 and dc17d130 (ineligible, offer escalation), 28969dfa (policy question).",
+      "requirement": "ESC-1 (revised 2026-11-15: call issue_refund in the same turn for an eligible, requested refund)",
+      "evaluator": "code check",
+      "neighbor": "unbacked_action_claim",
+      "status": "candidate",
+      "created_from": [
+        "ec5a5081aabf",
+        "97a7f7eefdfc",
+        "de89351c3056",
+        "fade1e2bafc9",
+        "a0bfa9cbd6d1",
+        "0ecac0dc6ef8"
+      ],
+      "created_ts": "2026-11-15T14:41:53-0300",
+      "history": [
+        {
+          "ts": "2026-11-15T14:41:53-0300",
+          "field": "definition",
+          "old": "",
+          "new": "Present when the user explicitly asks for a refund on a specific order that the tools show as refund_eligible, and the agent ends the turn without calling issue_refund, asking whether to proceed instead. Absent when issue_refund is called (including when it queues the refund above $100), when the order is not eligible, or when the user only asks a policy question."
+        },
+        {
+          "ts": "2026-11-15T14:41:53-0300",
+          "field": "boundary",
+          "old": "",
+          "new": "Differs from unbacked_action_claim: that mode is a claim or promise of an action with no tool call; this one is no action and no claim, just a needless confirmation request. Code check: user turn requests a refund, an order result shows refund_eligible true, no issue_refund call in the trace, final message asks to proceed. Positives: 73660974, 4dd02d06, 3b6fa049 (batch 4), 13e10dba, 7ba948ef, f0740eeb. Close negatives: 2297d0c2 and 45f76839 (issue_refund called, tool queued), d85df8c2 and dc17d130 (ineligible, offer escalation), 28969dfa (policy question)."
+        },
+        {
+          "ts": "2026-11-15T14:41:53-0300",
+          "field": "requirement",
+          "old": "",
+          "new": "ESC-1 (above the threshold the tool queues the refund, the agent explains). SPEC revision pending: when the user asks for a refund on an order that passes the eligibility check, the agent calls issue_refund in that turn rather than asking permission."
+        },
+        {
+          "ts": "2026-11-15T14:41:53-0300",
+          "field": "evaluator",
+          "old": "",
+          "new": "code check"
+        },
+        {
+          "ts": "2026-11-15T14:41:53-0300",
+          "field": "neighbor",
+          "old": "",
+          "new": "unbacked_action_claim"
+        },
+        {
+          "ts": "2026-11-15T14:41:53-0300",
+          "field": "created_from",
+          "added": "ec5a5081aabf"
+        },
+        {
+          "ts": "2026-11-15T14:41:53-0300",
+          "field": "created_from",
+          "added": "97a7f7eefdfc"
+        },
+        {
+          "ts": "2026-11-15T14:41:53-0300",
+          "field": "created_from",
+          "added": "de89351c3056"
+        },
+        {
+          "ts": "2026-11-15T14:45:11-0300",
+          "field": "created_from",
+          "added": "fade1e2bafc9"
+        },
+        {
+          "ts": "2026-11-15T14:45:11-0300",
+          "field": "created_from",
+          "added": "a0bfa9cbd6d1"
+        },
+        {
+          "ts": "2026-11-15T14:45:11-0300",
+          "field": "created_from",
+          "added": "0ecac0dc6ef8"
+        },
+        {
+          "ts": "2026-11-15T15:07:16-0300",
+          "field": "requirement",
+          "old": "ESC-1 (above the threshold the tool queues the refund, the agent explains). SPEC revision pending: when the user asks for a refund on an order that passes the eligibility check, the agent calls issue_refund in that turn rather than asking permission.",
+          "new": "ESC-1 (revised 2026-11-15: call issue_refund in the same turn for an eligible, requested refund)"
+        }
+      ]
+    }
+  ]
+}
