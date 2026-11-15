@@ -31,7 +31,7 @@ Labels live in `analysis/state/labels/<mode>.jsonl` and as Langfuse scores (`hw4
 
 ## 3. New modes in the final 15 traces
 
-**1.** Batch 4 produced one new consequential mode, `refund_not_submitted_after_request` (`3b6fa049`, `4dd02d06`). Of the 15 traces, 11 are marked "no failure observed", one more (`b1aea5f9`, the `query='*'` pattern) fits an existing mode after the student converted it, and `76cc3a60` has a note about an unnecessary argument that is not a failure.
+**1.** One mode was added after batch 4: `refund_not_submitted_after_request`. Its pattern had one earlier note (`73660974`, batch 2) that was judged then not to need a mode; batch 4 repeated it twice (`3b6fa049`, `4dd02d06`), so it was added. The Progress tab lists its first-seen batch as 1 because three earlier traces were converted to notes under it afterwards (`13e10dba`, `7ba948ef`, `f0740eeb`). Of the 15 traces, 11 are marked "no failure observed", one more (`b1aea5f9`, the `query='*'` pattern) fits an existing mode after the student converted it, and `76cc3a60` has a note about an unnecessary argument that is not a failure.
 
 <!-- student:stability -->
 -> New mode was found ("refund_not_submitted_after_request")

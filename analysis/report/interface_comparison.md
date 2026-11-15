@@ -1,6 +1,6 @@
 # Interface comparison
 
-The interface is in `analysis/review_app/` (single-file `index.html`, a standard-library HTTP server in `server.py`, sampling in `sampling.py`, 17 offline tests under `tests/`).
+The interface is in `analysis/review_app/` (single-file `index.html`, a standard-library HTTP server in `server.py`, sampling in `sampling.py`, 19 offline tests under `tests/`).
 
 ## One design retained from the reference interface
 
