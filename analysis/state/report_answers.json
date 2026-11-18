@@ -1,0 +1,184 @@
+{
+  "answers": {
+    "stability": {
+      "text": "-> New mode was found (\"refund_not_submitted_after_request\")\n-> further notes were added to existing modes\n-> taxonomy is now stable",
+      "history": [
+        {
+          "ts": "2026-11-15T16:23:28-0300",
+          "text": "Th"
+        },
+        {
+          "ts": "2026-11-15T16:23:35-0300",
+          "text": "-> New mode was found ("
+        },
+        {
+          "ts": "2026-11-15T16:23:48-0300",
+          "text": "-> New mode was found (\"refund_not_submitted_after_request\")\n-> "
+        },
+        {
+          "ts": "2026-11-15T16:24:09-0300",
+          "text": "-> New mode was found (\"refund_not_submitted_after_request\")\n-> further notes were added to existing modes\n-> "
+        }
+      ],
+      "ts": "2026-11-15T16:24:24-0300"
+    },
+    "revision": {
+      "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was to change the tool contract to be more clear and what it accepts, it fixed both\n-> We merged both modes into search_products_invalid_args\n-> Traces:  15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873, 868ec588, 20f03214\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9).",
+      "history": [
+        {
+          "ts": "2026-11-15T16:25:05-0300",
+          "text": "CANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:31:36-0300",
+          "text": "CANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:31:44-0300",
+          "text": "-> See traces below\n-> \n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:04-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:24-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> \n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:28-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was \n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:32-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*'\n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:37-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> B\n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:38-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> \n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:45-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was a p\n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:46-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was a \n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:32:55-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was to change the tool contract to be more clear and what it accepts\n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:33:01-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was to change the tool contract to be more clear and what it accepts, it fixed both\n-> We merged both modes into \n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:33:07-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was to change the tool contract to be more clear and what it accepts, it fixed both\n-> We merged both modes into search_products_invalid_args\n-> Traces: \n\nCANDIDATE A, merge: the first mode was 'store filter is an ID instead of a name' (15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:33:12-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was to change the tool contract to be more clear and what it accepts, it fixed both\n-> We merged both modes into search_products_invalid_args\n-> Traces:  15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:33:14-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was to change the tool contract to be more clear and what it accepts, it fixed both\n-> We merged both modes into search_products_invalid_args\n-> Traces:  15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873, ). Later traces called search_products with query '*' and a valid store (868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:33:17-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was to change the tool contract to be more clear and what it accepts, it fixed both\n-> We merged both modes into search_products_invalid_args\n-> Traces:  15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873, 868ec588, 20f03214). Both produce an empty or failed search from a bad argument, and one product change (state in the tool contract what store and query accept) fixes both, so they were merged into search_products_invalid_args. \n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        },
+        {
+          "ts": "2026-11-15T16:33:19-0300",
+          "text": "-> See traces below\n-> The first mode was \"store filter is an ID not name\"\n-> Second mode was search_products with query '*' and a valid store\n-> The solution was to change the tool contract to be more clear and what it accepts, it fixed both\n-> We merged both modes into search_products_invalid_args\n-> Traces:  15ee0490, d2cf1530, 116b1bbc, ecd4b0d2, 2cf7b873, 868ec588, 20f03214\n\n-> Four more '*' traces were found later (0269ec43, 04c66f15, 27cf468a, b1aea5f9)."
+        }
+      ],
+      "ts": "2026-11-15T16:33:20-0300"
+    },
+    "suggestions": {
+      "text": "On the ones that passed, model flagged the data discrepancy, in the others, it didn't acknowledge it",
+      "history": [
+        {
+          "ts": "2026-11-15T16:26:06-0300",
+          "text": "On the ones that passed, model flagged the data discrepancy"
+        }
+      ],
+      "ts": "2026-11-15T16:26:12-0300"
+    },
+    "label_review": {
+      "text": "10 labels were reviewed, only positives",
+      "history": [
+        {
+          "ts": "2026-11-15T16:26:49-0300",
+          "text": "5-10 labels were reviewed"
+        },
+        {
+          "ts": "2026-11-15T16:33:38-0300",
+          "text": "10 labels were reviewed"
+        },
+        {
+          "ts": "2026-11-15T16:33:40-0300",
+          "text": "10 labels were reviewed, "
+        }
+      ],
+      "ts": "2026-11-15T16:33:46-0300"
+    },
+    "agentdebug": {
+      "text": "I compared my taxonomy with AgentDebug (arXiv 2509.25370), which groups agent failures into five modules: memory, reflection, planning, action and system-level. I could read the module descriptions in the paper's main text, but not its appendix table of individual failure types; the type names below come from a second-hand reading of that table, so they should be checked against Appendix A.2 before they are relied on.\n\n- `search_products_invalid_args` is closest to Action: Parameter Error (a malformed or unreasonable argument).\n- `unbacked_action_claim` is closest to Action: Planning-Action Disconnect (the reply states an intent that the actions do not carry out).\n- `tool_error_misreported` is closest to Reflection: Outcome Misinterpretation (the agent misreads what the tool returned).\n- `repeated_failed_tool_call` is closest to Reflection: Causal Misattribution (the failure is noticed but the cause is not corrected).\n- `dispute_not_escalated` fits Planning: Constraint Ignorance only if a policy counts as a constraint.\n- `inconsistent_data_not_stated` fits Outcome Misinterpretation only weakly.\n- `refund_not_submitted_after_request` has no counterpart.\n\nI am not adding a mode because of AgentDebug. Its modules describe how an agent's reasoning and actions break down, while two of my modes (`dispute_not_escalated`, `refund_not_submitted_after_request`) are defined by this product's rules in `SPEC.md` and by my annotations, which AgentDebug does not cover. All seven modes stay.",
+      "history": [
+        {
+          "ts": "2026-11-15T16:27:03-0300",
+          "text": "AgentDebug (arXiv 2509.25370) has 17 failure types in 5 modules: memory, reflection, planning, action, system-level. The list here was read through a subagent and is not verified by you.\nsearch_products_invalid_args is closest to Action: Parameter Error.\nunbacked_action_claim is closest to Planning-Action Disconnect; tool_error_misreported to Reflection: Outcome Misinterpretation; repeated_failed_tool_call to Reflection: Causal Misattribution; dispute_not_escalated to Planning: Constraint Ignorance.\ninconsistent_data_not_stated fits Outcome Misinterpretation only weakly; refund_not_submitted_after_request has no counterpart. Both come from SPEC.md rules and your annotations."
+        }
+      ],
+      "ts": "2026-11-15T16:46:51-0300"
+    },
+    "iface_retained": {
+      "text": "I kept three ideas from the supplied reference interface (`analysis/ui/index.html`), re-implemented in `analysis/review_app/` rather than submitted unchanged: a tool call is grouped with the tool result that follows it as one step, the quoted span of a message is highlighted with its margin note beside it, and accepting a suggestion turns it into my own annotation.\n\nI kept them because they keep the evidence for a judgment in one place: the result sits next to the call that produced it, and the note sits next to the sentence it is about, so I do not scroll between a tool result and the reply that describes it.",
+      "history": [
+        {
+          "ts": "2026-11-15T16:27:18-0300",
+          "text": "-"
+        },
+        {
+          "ts": "2026-11-15T16:27:23-0300",
+          "text": "- accept-to-an"
+        },
+        {
+          "ts": "2026-11-15T16:27:32-0300",
+          "text": "-> groups tool_call"
+        },
+        {
+          "ts": "2026-11-15T16:27:35-0300",
+          "text": "The supplied reference (analysis/ui/index.html) has three views (Trace, Map, Progress) and shows one trace at a time.\nIt groups a tool_call with the tool_result that follows it into one step, highlights the quoted span in a message, and places the margin note next to it. Accepting a suggestion turns it into your annotation.\nYour interface (analysis/review_app/) keeps the grouped tool_call/result steps, the span highlight with margin notes, and accept-to-annotation for suggestions. The code is newly written, not a copy."
+        }
+      ],
+      "ts": "2026-11-15T16:46:51-0300"
+    },
+    "iface_changed": {
+      "text": "I made sure everything from a trace was immediately visible in one single page",
+      "history": [
+        {
+          "ts": "2026-11-15T16:27:53-0300",
+          "text": "I made sure everything from a trace was immediately visible o"
+        }
+      ],
+      "ts": "2026-11-15T16:28:01-0300"
+    },
+    "iface_limitation": {
+      "text": "It would be better to have a native integration between Langfuse and the new Annotation UI so that data lives in one place",
+      "history": [
+        {
+          "ts": "2026-11-15T16:28:14-0300",
+          "text": "It would be better to have a"
+        }
+      ],
+      "ts": "2026-11-15T16:28:26-0300"
+    }
+  }
+}
